@@ -1,3 +1,3 @@
 # Pictionary-Game-in-JavaFX
 
-The game has two components, the Server and the Client. Programsare GameServerGUI and GameClientGUI respectively.
+The game has two components, the Server and the Client. Programs are GameServerGUI and GameClientGUI respectively.
