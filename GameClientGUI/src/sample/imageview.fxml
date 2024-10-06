@@ -45,14 +45,16 @@
         <VBox prefHeight="600.0" prefWidth="280.0" style="-fx-background-color: #ffebe6;" BorderPane.alignment="CENTER">
             <children>
                 <TextArea fx:id="list" editable="false" prefHeight="557.0" prefWidth="275.0" promptText="guesses" style="-fx-background-color: #ffebe6;" wrapText="true">
-               <font>
-                  <Font name="Tlwg Mono Bold" size="15.0" />
-               </font></TextArea>
+                   <font>
+                      <Font name="Tlwg Mono Bold" size="15.0" />
+                   </font>
+                </TextArea>
                 <Separator prefWidth="275.0" />
                 <TextField fx:id="message" onAction="#onMessage" promptText="guess here" style="-fx-background-color: #ffc2b3;">
-               <font>
-                  <Font name="Tlwg Mono Bold" size="17.0" />
-               </font></TextField>
+                    <font>
+                        <Font name="Tlwg Mono Bold" size="17.0" />
+                    </font>
+                </TextField>
             </children>
          <padding>
             <Insets right="5.0" />

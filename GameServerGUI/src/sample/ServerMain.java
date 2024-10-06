@@ -25,12 +25,12 @@ public class ServerMain extends Application{
     public static ArrayList<ObjectInputStream> oisList=new ArrayList<>();
     public static ArrayList<OutputStream> canvasOut=new ArrayList<>();
 
-    public static int playerCount=2;
+    public static int playerCount=1;
     public static int rounds=3;
 
     public static ArrayList<String> names=new ArrayList<>();
     public static ArrayList<Integer> scoreList=new ArrayList<>();
-    private static final ExecutorService pool=Executors.newFixedThreadPool(playerCount);
+    private static final ExecutorService pool=Executors.newCachedThreadPool();
 
     public static ArrayList<String> words=new ArrayList<>();
 
@@ -46,27 +46,33 @@ public class ServerMain extends Application{
     }
 
     public static void main(String[] args) throws IOException, InterruptedException {
-        getWords();
+//        getWords();
         getStartHandler();
         System.out.println("GameHandler Started..");
         launch(args);
     }
 
-    private static void getWords() throws FileNotFoundException {
-        File wordsFile=new File("words.txt");
-        Scanner sc=new Scanner(wordsFile);
-        sc.useDelimiter(", ");
-        while(sc.hasNext()) words.add(sc.next().toLowerCase(Locale.ROOT));
-//        Pattern pat = Pattern.compile("[a-zA-Z]+");
-//        while(sc.hasNext() && pat.matcher(sc.next()).matches()) words.add(sc.next().toLowerCase(Locale.ROOT));
-    }
-
     private static void getStartHandler() throws InterruptedException, IOException {
-        System.out.println("Player count set to: "+playerCount);
+        System.out.println("Player count set to: " + playerCount);
         listener=new ServerSocket(6666);
         listener1=new ServerSocket(6677);
         System.out.println("Waiting for clients...");
         Socket client;
+//        int connectedPlayers = 0;
+//        while (connectedPlayers < playerCount) {
+//            client = listener.accept();
+//            ObjectOutputStream dOut = new ObjectOutputStream(client.getOutputStream());
+//            ObjectInputStream dIn = new ObjectInputStream(client.getInputStream());
+//            connectedPlayers++;
+//            System.out.println("MAIN: Connected: " + connectedPlayers);
+//            StartHandler sThread = new StartHandler(clients, connectedPlayers, dOut, dIn);
+//            oosList.add(dOut);
+//            oisList.add(dIn);
+//            socketList.add(client);
+//            clients.add(sThread);
+//
+//            pool.execute(sThread);
+//        }
         for(int i=1;i<=playerCount;i++){
             client=listener.accept();
             ObjectOutputStream dOut=new ObjectOutputStream(client.getOutputStream());
@@ -81,6 +87,7 @@ public class ServerMain extends Application{
         pool.shutdown();
         pool.awaitTermination(10, TimeUnit.SECONDS);
         System.out.println("StartHandler Closed..");
+//        System.out.println("StartHandler Ready to accept more clients..");
     }
 
     static String getWinners(){
@@ -119,6 +126,7 @@ class CheckStatus{
         ServerMain.oosList.remove(ind);
         ServerMain.oisList.remove(ind);
         ServerMain.canvasOut.remove(ind);
+        ServerMain.socketList.remove(ind);
 
         if(ServerMain.names.size()==0){
             System.out.println("All players have Left...\nClosing SERVER..");

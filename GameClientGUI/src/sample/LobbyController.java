@@ -35,10 +35,10 @@ public class LobbyController {
                 for(int i=2;i<=n+1;i++){
                     int finalI = i;
                     String friend = (String) dIn.readObject();
-                    Platform.runLater(() -> playerList.appendText(finalI+". "+friend+"\n"));
+                    Platform.runLater(() -> playerList.appendText(finalI + ". " + friend + "\n"));
                     System.out.println(i + ": " + friend);
                 }
-                setTimer(10);
+                setTimer(5);
             } catch (IOException | ClassNotFoundException e) {e.printStackTrace();}
         }).start();
     }

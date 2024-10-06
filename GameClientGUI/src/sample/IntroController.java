@@ -24,36 +24,48 @@ public class IntroController {
     public void initialize(){}
 
     public void nextScene() {
-        String pname = name.getText();
-        String addr=ip.getText();
-        if(pname.isEmpty()){
+        String username = name.getText();
+        String password = ip.getText();
+        if(username.isEmpty()){
             JOptionPane.showMessageDialog(null,"Name cannot be Empty..");
-        } else if(pname.equals("SERVER")||pname.equals("Round")){
-            JOptionPane.showMessageDialog(null,"name \""+pname+"\" is not allowed, please change..");
+        } else if(username.equals("SERVER") || username.equals("Round")){
+            JOptionPane.showMessageDialog(null,"name \""+username+"\" is not allowed, please change..");
             name.clear();
         } else {
-            try {
-                player = new UserData(pname, addr);
-                Socket server = new Socket(addr, 6666);
-                player.setSocket(server);
-            } catch (IOException e) {
-                JOptionPane.showMessageDialog(null,"No server running in the entered IP address\n"+
-                        "  please recheck it and try again..","CONNECTION ERROR", JOptionPane.WARNING_MESSAGE);
-                System.out.println("Server not found..");
-                System.exit(0);
-            }
+            if(DBConnection.authenticateUser(username, password)) {
+                try {
+                    int score = DBConnection.getScoreFromUser(username);
+                    player = new UserData(username, password, score);
+                    Socket server = new Socket("localhost", 6666);
+                    player.setSocket(server);
+                } catch (IOException e) {
+                    JOptionPane.showMessageDialog(null,"No server running in the entered IP address\n"+
+                            "  please recheck it and try again..","CONNECTION ERROR", JOptionPane.WARNING_MESSAGE);
+                    System.out.println("Server not found..");
+                    System.exit(0);
+                }
 
+            } else {
+                JOptionPane.showMessageDialog(null,"Username or password is incorrect !");
+            }
+//                player = new UserData(username, password);
+//                Socket server = new Socket(password, 6666);
+//                player.setSocket(server);
             try {
                 FXMLLoader loader=new FXMLLoader(getClass().getResource("lobby.fxml"));
+//                FXMLLoader loader=new FXMLLoader(getClass().getResource("home.fxml"));
                 Parent root=loader.load();
                 LobbyController controller = loader.getController();
+//                HomeController controller = loader.getController();
                 controller.setUserData(player);
+//                System.out.println(player.getUsername());
                 Stage stage = (Stage) go.getScene().getWindow();
                 stage.setScene(new Scene(root));
+                stage.setTitle("Đuổi hình bắt chữ");
+                stage.show();
             } catch (IOException e) {e.printStackTrace();}
         }
     }
-
     public void onExit(){
         Platform.exit();
     }

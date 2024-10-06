@@ -1,0 +1,16 @@
+<component name="libraryTable">
+  <library name="lib">
+    <CLASSES>
+      <root url="jar://$PROJECT_DIR$/GameClientGUI/lib/javafx-base-11-linux.jar!/" />
+      <root url="jar://$PROJECT_DIR$/GameClientGUI/lib/javafx-fxml-11-linux.jar!/" />
+      <root url="jar://$PROJECT_DIR$/GameClientGUI/lib/javafx-fxml-11.jar!/" />
+      <root url="jar://$PROJECT_DIR$/GameClientGUI/lib/javafx-base-11.jar!/" />
+      <root url="jar://$PROJECT_DIR$/GameClientGUI/lib/javafx-controls-11-linux.jar!/" />
+      <root url="jar://$PROJECT_DIR$/GameClientGUI/lib/javafx-graphics-11.jar!/" />
+      <root url="jar://$PROJECT_DIR$/GameClientGUI/lib/javafx-graphics-11-linux.jar!/" />
+      <root url="jar://$PROJECT_DIR$/GameClientGUI/lib/javafx-controls-11.jar!/" />
+    </CLASSES>
+    <JAVADOC />
+    <SOURCES />
+  </library>
+</component>

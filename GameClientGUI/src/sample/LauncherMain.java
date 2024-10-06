@@ -12,7 +12,7 @@ public class LauncherMain extends Application {
     Stage stage;
 
     @Override
-    public void start(Stage primaryStage) throws Exception{
+    public void start(Stage primaryStage) throws Exception {
         stage=primaryStage;
         Parent root = FXMLLoader.load(getClass().getResource("intro.fxml"));
         stage.setTitle("Pictionary game");
@@ -24,10 +24,7 @@ public class LauncherMain extends Application {
         stage.setScene(scene);
         stage.show();
     }
-
-
     public static void main(String[] args) {
         launch(args);
     }
 }
-

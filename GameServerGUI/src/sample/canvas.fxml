@@ -2,7 +2,7 @@
 
 <?import javafx.geometry.*?>
 <?import javafx.scene.*?>
-<?import javafx.scene.canvas.*?>
+<?import javafx.scene.image.*?>
 <?import javafx.scene.control.*?>
 <?import javafx.scene.effect.*?>
 <?import javafx.scene.layout.*?>
@@ -20,90 +20,71 @@
             </MenuBar>
             <ToolBar style="-fx-background-color: #006600;">
                 <HBox alignment="CENTER" prefHeight="35.0" prefWidth="880.0" spacing="5">
-                    <Label style="-fx-background-color: #006600;" text="Size" textFill="WHITE" wrapText="true">
-                  <font>
-                     <Font name="Tlwg Mono Bold" size="16.0" />
-                  </font>
-                  <HBox.margin>
-                     <Insets left="5.0" />
-                  </HBox.margin></Label>
-                    <Slider fx:id="brushSize" prefHeight="16.0" prefWidth="147.0" style="-fx-background-color: #006600;" />
-                    <ColorPicker fx:id="colorPicker" prefHeight="26.0" prefWidth="109.0" style="-fx-background-color: #ccffcc;">
-                        <HBox.margin>
-                            <Insets left="15.0" />
-                        </HBox.margin>
-                  <value>
-                     <Color />
-                  </value></ColorPicker>
-                    <CheckBox fx:id="eraser" style="-fx-background-color: #006600;" text="Eraser" textFill="WHITE" wrapText="true">
-                        <HBox.margin>
-                            <Insets left="15.0" />
-                        </HBox.margin>
-                  <font>
-                     <Font name="Tlwg Mono Bold" size="15.0" />
-                  </font></CheckBox>
-                    <Button fx:id="clear" mnemonicParsing="false" prefHeight="39.0" prefWidth="86.0" style="-fx-background-color: #000000; -fx-border-color: #e6ffe6;" text="Clear" textFill="WHITE" wrapText="true">
-                        <HBox.margin>
-                            <Insets left="20.0" />
-                        </HBox.margin>
-                  <font>
-                     <Font name="Tlwg Mono Bold" size="18.0" />
-                  </font></Button>
+                    <!-- Đã loại bỏ các công cụ vẽ: Size, Slider, ColorPicker, Eraser, Clear -->
                     <Separator orientation="VERTICAL" prefHeight="39.0" prefWidth="45.0">
-                  <HBox.margin>
-                     <Insets left="10.0" />
-                  </HBox.margin></Separator>
+                        <HBox.margin>
+                            <Insets left="10.0" />
+                        </HBox.margin>
+                    </Separator>
                     <Label fx:id="displayTimer" alignment="CENTER_RIGHT" contentDisplay="RIGHT" prefHeight="35.0" prefWidth="275.0" text="Next Round in: 00" textFill="WHITE" wrapText="true">
-                  <HBox.margin>
-                     <Insets />
-                  </HBox.margin>
-                  <font>
-                     <Font name="Tlwg Mono Bold" size="23.0" />
-                  </font>
-                  <padding>
-                     <Insets left="5.0" right="10.0" />
-                  </padding></Label>
+                        <HBox.margin>
+                            <Insets />
+                        </HBox.margin>
+                        <font>
+                            <Font name="Tlwg Mono Bold" size="23.0" />
+                        </font>
+                        <padding>
+                            <Insets left="5.0" right="10.0" />
+                        </padding>
+                    </Label>
                 </HBox>
             </ToolBar>
         </VBox>
     </top>
     <center>
-        <Canvas fx:id="canvas" height="600" width="600.0">
+        <!-- Thay thế Canvas bằng ImageView để hiển thị hình ảnh từ server -->
+        <ImageView fx:id="imageView" fitHeight="600.0" fitWidth="600.0" preserveRatio="true">
             <cursor>
                 <Cursor fx:constant="DEFAULT" />
             </cursor>
             <effect>
                 <Glow level="0.0" />
-            </effect></Canvas>
+            </effect>
+        </ImageView>
     </center>
     <right>
         <VBox prefHeight="600.0" prefWidth="250.0" BorderPane.alignment="CENTER">
             <children>
                 <TextArea fx:id="list" editable="false" prefHeight="565.0" prefWidth="250.0" promptText="guesses">
-               <font>
-                  <Font name="Tlwg Mono Bold" size="15.0" />
-               </font></TextArea>
+                    <font>
+                        <Font name="Tlwg Mono Bold" size="15.0" />
+                    </font>
+                </TextArea>
                 <Separator prefWidth="200.0" />
                 <TextField fx:id="message" onAction="#onMessage" prefHeight="28.0" prefWidth="250.0" promptText="message" style="-fx-background-color: #ccffcc;">
-               <font>
-                  <Font name="Tlwg Mono Bold" size="16.0" />
-               </font>
-               <VBox.margin>
-                  <Insets bottom="5.0" />
-               </VBox.margin></TextField>
-            </children></VBox>
+                    <font>
+                        <Font name="Tlwg Mono Bold" size="16.0" />
+                    </font>
+                    <VBox.margin>
+                        <Insets bottom="5.0" />
+                    </VBox.margin>
+                </TextField>
+            </children>
+        </VBox>
     </right>
     <bottom>
         <HBox prefHeight="35.0" prefWidth="774.0" style="-fx-background-color: #006600;" BorderPane.alignment="CENTER">
             <children>
-            <Label fx:id="wordLabel" contentDisplay="CENTER" prefHeight="35.0" prefWidth="457.0" text="DRAW THIS: " textFill="WHITE">
-               <font>
-                  <Font name="Tlwg Mono Bold" size="18.0" />
-               </font>
-               <padding>
-                  <Insets left="10.0" />
-               </padding></Label>
-                <Label fx:id="playerDisplay" prefHeight="35.0" prefWidth="336.0" text="SERVER WINDOW - Drawing Pane" textFill="WHITE">
+                <!-- Cập nhật văn bản để phản ánh cơ chế mới -->
+                <Label fx:id="wordLabel" contentDisplay="CENTER" prefHeight="35.0" prefWidth="457.0" text="GUESS THE WORD: " textFill="WHITE">
+                    <font>
+                        <Font name="Tlwg Mono Bold" size="18.0" />
+                    </font>
+                    <padding>
+                        <Insets left="10.0" />
+                    </padding>
+                </Label>
+                <Label fx:id="playerDisplay" prefHeight="35.0" prefWidth="336.0" text="CLIENT WINDOW - Guessing Pane" textFill="WHITE">
                     <padding>
                         <Insets left="15.0" />
                     </padding>
@@ -114,6 +95,7 @@
                         <Font name="Tlwg Mono Bold" size="18.0" />
                     </font>
                 </Label>
-            </children></HBox>
+            </children>
+        </HBox>
     </bottom>
 </BorderPane>

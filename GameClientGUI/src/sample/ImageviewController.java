@@ -40,8 +40,12 @@ public class ImageviewController {
             String str=message.getText();
             str=str.trim();
             if(!str.isEmpty()) {
-                try { dOut.writeObject(str); dOut.flush(); }
-                catch (IOException ioe) { ioe.printStackTrace(); }
+                try {
+                    dOut.writeObject(str);
+                    dOut.flush();
+                } catch (IOException ioe) {
+                    ioe.printStackTrace();
+                }
                 message.clear();
             }
         });
@@ -88,7 +92,7 @@ public class ImageviewController {
         player = u;
         dIn = player.ois;
         dOut = player.oos;
-        playerDisplay.setText("PLAYER: "+player.username);
+        playerDisplay.setText("PLAYER: " + player.getUsername());
         dOut.writeBoolean(true); dOut.flush();   //player ready==true
         imageReceiver();
         allResponses();
@@ -127,11 +131,16 @@ public class ImageviewController {
                         timer = setTimer(90);
                         Platform.runLater(()->serverLabel.setText(res));
                     } else if(res.equals("ROUND OVER")) {
+                        timer = setTimer(5);
                         timer.join();
                         tellServer("IM_DONE_GUESSING");
                         String ans=(String) dIn.readObject();
-                        Platform.runLater(()->serverLabel.setText(ans));
-                        timer = setWaitTimer(15);
+                        Platform.runLater(()->{
+                            serverLabel.setText(ans);
+                            list.clear();
+                        });
+                        timer = setWaitTimer(5);
+                        timer.join();
                     } else if(res.equals("GAME OVER")) {
                         timer.join();
                         String ans=(String) dIn.readObject();
@@ -143,7 +152,7 @@ public class ImageviewController {
                         timer.join();
                         player.server.close();
                         System.exit(0);
-                    } else Platform.runLater(()->list.appendText(res+"\n"));
+                    } else Platform.runLater(()->list.appendText(res + "\n"));
                 }
             } catch (IOException | ClassNotFoundException | InterruptedException e) { e.printStackTrace(); }
         });
