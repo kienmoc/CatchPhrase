@@ -98,27 +98,91 @@ public class ImageviewController {
         allResponses();
     }
 
+//    public void imageReceiver() throws IOException {
+//        InputStream is=player.imageIn.getInputStream();
+//        new Thread(()->{
+//            byte[] imSize,byteImage;
+//            int sizeInt;
+//            BufferedImage bIn;
+//            try {
+//                while(!gameOver){
+//                    imSize = new byte[4];
+//                    is.read(imSize);
+//                    sizeInt = ByteBuffer.wrap(imSize).asIntBuffer().get();
+//                    byteImage = is.readNBytes(sizeInt);
+//                    bIn=ImageIO.read(new ByteArrayInputStream(byteImage));
+//                    Image im = SwingFXUtils.toFXImage(bIn,null);
+//                    Platform.runLater(()->imView.setImage(im));
+//                }
+//                is.close();
+//                player.imageIn.close();
+//            } catch (IOException e) {e.printStackTrace();}
+//        }).start();
+//    }
     public void imageReceiver() throws IOException {
-        InputStream is=player.imageIn.getInputStream();
-        new Thread(()->{
-            byte[] imSize,byteImage;
+        InputStream is = player.imageIn.getInputStream();
+        new Thread(() -> {
+            byte[] imSize, byteImage;
             int sizeInt;
             BufferedImage bIn;
             try {
-                while(!gameOver){
-                    imSize = new byte[4];
+                while (!gameOver) {
+                    imSize = new byte[4]; // Nhận kích thước của ảnh
                     is.read(imSize);
-                    sizeInt = ByteBuffer.wrap(imSize).asIntBuffer().get();
-                    byteImage = is.readNBytes(sizeInt);
-                    bIn=ImageIO.read(new ByteArrayInputStream(byteImage));
-                    Image im = SwingFXUtils.toFXImage(bIn,null);
-                    Platform.runLater(()->imView.setImage(im));
+                    sizeInt = ByteBuffer.wrap(imSize).getInt(); // Chuyển đổi kích thước ảnh thành số nguyên
+                    byteImage = is.readNBytes(sizeInt); // Nhận dữ liệu ảnh
+                    bIn = ImageIO.read(new ByteArrayInputStream(byteImage)); // Đọc ảnh
+                    Image im = SwingFXUtils.toFXImage(bIn, null); // Chuyển đổi sang Image cho JavaFX
+                    Platform.runLater(() -> imView.setImage(im)); // Hiển thị ảnh trên UI
                 }
-                is.close();
-                player.imageIn.close();
-            } catch (IOException e) {e.printStackTrace();}
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
         }).start();
     }
+
+//    public void allResponses(){
+//        Thread allres=new Thread(() -> {
+//            Thread timer=setTimer(0);
+//            try {
+//                while(true){
+//                    String res = (String) dIn.readObject();
+//                    if(res.startsWith("Round: ")){
+//                        timer.join();
+//                        timer = setTimer(90);
+//                        Platform.runLater(()->serverLabel.setText(res));
+//                    } else if(res.equals("ROUND OVER")) {
+////                        timer.interrupt();
+////                        Thread waitTimer = setWaitTimer(5);
+////                        waitTimer.join();
+//                        tellServer("IM_DONE_GUESSING");
+//                        String ans=(String) dIn.readObject();
+//                        Platform.runLater(()->{
+//                            serverLabel.setText(ans);
+//                            list.clear();
+//                        });
+//                        timer = setTimer(90);
+//                    } else if(res.equals("GAME OVER")) {
+////                        timer.join();
+//                        String ans=(String) dIn.readObject();
+//                        Platform.runLater(()->serverLabel.setText(ans));
+////                        timer=setTimer(10);
+////                        timer.join();
+//                        Platform.runLater(() -> serverLabel.setText(res));
+////                        timer=setTimer(10);
+////                        timer.join();
+//                        player.server.close();
+//                        System.exit(0);
+//                    } else Platform.runLater(()->list.appendText(res + "\n"));
+//                }
+//            } catch (IOException | ClassNotFoundException | InterruptedException e) { e.printStackTrace(); }
+//        });
+//        allres.start();
+//
+////        try {
+////            allres.join();
+////        } catch (InterruptedException e) { e.printStackTrace(); }
+//    }
 
     public void allResponses(){
         Thread allres=new Thread(() -> {
@@ -128,10 +192,9 @@ public class ImageviewController {
                     String res = (String) dIn.readObject();
                     if(res.startsWith("Round: ")){
                         timer.join();
-                        timer = setTimer(90);
+                        timer = setTimer(30);
                         Platform.runLater(()->serverLabel.setText(res));
                     } else if(res.equals("ROUND OVER")) {
-                        timer = setTimer(5);
                         timer.join();
                         tellServer("IM_DONE_GUESSING");
                         String ans=(String) dIn.readObject();
@@ -140,26 +203,21 @@ public class ImageviewController {
                             list.clear();
                         });
                         timer = setWaitTimer(5);
-                        timer.join();
                     } else if(res.equals("GAME OVER")) {
                         timer.join();
                         String ans=(String) dIn.readObject();
                         Platform.runLater(()->serverLabel.setText(ans));
-                        timer=setTimer(10);
+                        timer=setTimer(5);
                         timer.join();
                         Platform.runLater(() -> serverLabel.setText(res));
-                        timer=setTimer(10);
+                        timer=setTimer(5);
                         timer.join();
                         player.server.close();
                         System.exit(0);
-                    } else Platform.runLater(()->list.appendText(res + "\n"));
+                    } else Platform.runLater(()->list.appendText(res+"\n"));
                 }
             } catch (IOException | ClassNotFoundException | InterruptedException e) { e.printStackTrace(); }
         });
         allres.start();
-
-//        try {
-//            allres.join();
-//        } catch (InterruptedException e) { e.printStackTrace(); }
     }
 }

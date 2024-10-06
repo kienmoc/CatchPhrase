@@ -39,7 +39,8 @@ public class CanvasController {
     @FXML
     private ImageView imageView;
     private final String imagesPath = "images";
-    public static volatile boolean isOneCorrect = false;
+    Thread timer;
+    public static AtomicBoolean isOneCorrect = new AtomicBoolean(false);
 
     public File getRandomImageFile() {
         File folder = new File(imagesPath);
@@ -101,56 +102,6 @@ public class CanvasController {
             }
         });
     }
-//    public void onMessage() {
-//        String str = message.getText();
-//        if (!str.isEmpty()) {
-//            list.appendText("SERVER: " + str + "\n");
-//            try {
-//                sendResOut("SERVER: " + str);
-//            } catch (IOException ioe) {
-//                ioe.printStackTrace();
-//            }
-//            message.clear();
-//        }
-//    }
-
-    public void onExit() { System.exit(0); }
-
-    public Thread setTimer(int duration){
-        Thread t=new Thread(() -> {
-            try {
-                for (int dur=duration;dur>=1;dur--) {
-                    int finalDur = dur;
-                    Platform.runLater(() -> displayTimer.setText("Timer: "+finalDur));
-                    sleep(1000);
-                }
-                Platform.runLater(() -> displayTimer.setText("Timer: " + 0));
-            } catch (InterruptedException e) {
-//                e.printStackTrace();
-                System.out.println("Timer was interrupted.");
-            }
-        });
-        t.start();
-        return t;
-    }
-
-    public Thread setWaitTimer(int duration){
-        Thread t=new Thread(() -> {
-            try {
-                for (int dur=duration;dur>=1;dur--) {
-                    int finalDur = dur;
-                    Platform.runLater(() -> displayTimer.setText("Next Round in: " + finalDur));
-                    sleep(1000);
-                }
-                Platform.runLater(() -> displayTimer.setText("Next Round in: " + 0));
-            } catch (InterruptedException e) {
-//                e.printStackTrace();
-                System.out.println("Wait timer was interrupted.");
-            }
-        });
-        t.start();
-        return t;
-    }
 
     public void sendImage(Image im){
         new Thread(()->{
@@ -170,52 +121,45 @@ public class CanvasController {
         }).start();
     }
 
-//    public void gameHandler() {
-//        int pc=ServerMain.playerCount;
-//
-//        for(int round=1 ; round<=ServerMain.rounds ; round++) {
-//
-//            Platform.runLater(this::ClearCanvas);
-//            System.out.print("GameHandler round: " + round);
-//            String word = ServerMain.words.get((int) (Math.random() * ServerMain.words.size()));
-//            System.out.println(", Word chosen: " + word);
-//            String wordLength=getWordLength(word);
-//            try {
-//                sendResOut("Round: "+round+"   word: "+wordLength);
-//            } catch (IOException e) { e.printStackTrace(); }
-//
-//            Platform.runLater(() -> setWord(word));
-//            Thread timer=setTimer(90),waitTimer;
-//            Thread[] play=new Thread[pc];
-//            for(int pnum=0;pnum<pc;pnum++) {
-//                int finalPnum = pnum;
-//                play[pnum]=new Thread(()->gamePlay(finalPnum,word,timer));
-//                play[pnum].start();
-//            }
-//            try {
-//                timer.join();
-//                sendScores(round);
-//                if(round<ServerMain.rounds) {
-//                    waitTimer=setWaitTimer(15);
-//                    sendResOut("ROUND OVER");
-//                    for(int pnum=0;pnum<pc;pnum++) play[pnum].join();
-//                    sendResOut("Round: "+round+"   word: "+word);
-//                    waitTimer.join();
-//                }
-//                else {
-//                    sendResOut("Winner:\n"+ServerMain.getWinners());
-//                    sendResOut("GAME OVER");
-//                    sendResOut("Round: "+round+"   word: "+word);
-//                    System.exit(0);
-//                }
-//            } catch (InterruptedException | IOException e) { e.printStackTrace(); }
-//
-//        }
-//    }
-    public void gameHandler(){
-        int pc = ServerMain.playerCount;
-        System.out.println(pc);
+    public void onExit() { System.exit(0); }
 
+    public Thread setWaitTimer(int duration){
+        Thread t=new Thread(() -> {
+            try {
+                for (int dur=duration;dur>=1;dur--) {
+                    int finalDur = dur;
+                    Platform.runLater(() -> displayTimer.setText("Next Round in: " + finalDur));
+                    sleep(1000);
+                }
+                Platform.runLater(() -> displayTimer.setText(""));
+            } catch (InterruptedException e) {
+//                e.printStackTrace();
+                System.out.println("Wait timer was interrupted.");
+            }
+        });
+        t.start();
+        return t;
+    }
+
+    public Thread setTimer(int duration){
+        Thread t=new Thread(() -> {
+            try {
+                for (int dur=duration;dur>=1;dur--) {
+                    int finalDur = dur;
+                    Platform.runLater(() -> displayTimer.setText("Timer: " + finalDur));
+                    Thread.sleep(1000);
+                }
+                Platform.runLater(() -> displayTimer.setText("Timer: " + 0));
+            } catch (InterruptedException e) {
+                System.out.println("Timer was interrupted.");
+            }
+        });
+        t.start();
+        return t;
+    }
+
+    public void gameHandler() {
+        int pc=ServerMain.playerCount;
         Image[] images = new Image[3];
         String[] words = new String[3];
 
@@ -225,98 +169,139 @@ public class CanvasController {
             words[i] = imageFile.getName().replace(",", " ").replace(".png", "");
         }
 
-        for (int round = 1; round <= ServerMain.rounds; round++) {
-            isOneCorrect = false;
-            Platform.runLater(this::ClearImageView);
-            System.out.print("GameHandler round: " + round);
+        for(int round=1 ; round<=ServerMain.rounds ; round++) {
 
+            Platform.runLater(this::ClearImageView);
+            Platform.runLater(() -> {
+                list.clear();
+            });
+            System.out.print("GameHandler round: " + round);
             int i = round - 1;
             String word = words[i];
             String wordLength = getWordLength(word);
             System.out.println(", Word chosen: " + word);
             try {
-                sendResOut("Round: " + round + ", word: " + wordLength);
-                sendImage(images[i]); // Gửi ảnh tới client
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
+                sendResOut("Round: " + round + "   word: " + wordLength);
+                sendImage(images[i]);
+            } catch (IOException e) { e.printStackTrace(); }
 
-            // Thiết lập giao diện với từ hiện tại cho ảnh
             int finalI = i;
-            Platform.runLater(() -> setWord(words[finalI]));
-            Platform.runLater(() -> loadImageFromServer(images[finalI]));
-            // Đếm giờ cho người chơi đoán
-            Thread timer = setTimer(90), waitTimer; // Giới hạn thời gian đoán là 90 giây cho mỗi ảnh
-            Thread[] play = new Thread[pc];
-            for (int pnum = 0; pnum < pc; pnum++) {
+            Platform.runLater(() -> {
+                setWord(words[finalI]);
+                loadImageFromServer(images[finalI]);
+            });
+            Thread timer=setTimer(30),waitTimer;
+            Thread[] play=new Thread[pc];
+            for(int pnum=0;pnum<pc;pnum++) {
                 int finalPnum = pnum;
-                play[pnum] = new Thread(() -> gamePlay(finalPnum, word, timer));
+                play[pnum]=new Thread(()->gamePlay(finalPnum,word,timer));
                 play[pnum].start();
-
-//                while (!isOneCorrect && timer.isAlive()) {
-//                    // Chờ cho đến khi ai đó đoán đúng hoặc hết thời gian
-//                    try { Thread.sleep(100); // Hoặc bất kỳ độ trễ nào phù hợp
-//                    } catch (InterruptedException e) { throw new RuntimeException(e);}
-//                }
-//                if (isOneCorrect) {
-//                    for (int pn = 0; pn < pc; pn++) {
-//                        if (play[pn].isAlive()) {
-//                            // Nếu luồng vẫn đang chạy, bạn có thể gọi phương thức dừng luồng (ví dụ: interrupt)
-//                            play[pn].interrupt(); // Ngắt luồng
-//                        }
-//                    }
-//                    Platform.runLater(() -> list.clear());
-//                    timer.interrupt();
-//                    break;
-//                }
             }
-            while (!isOneCorrect && timer.isAlive()) {
-                // Chờ cho đến khi ai đó đoán đúng hoặc hết thời gian
-                try { Thread.sleep(100); // Hoặc bất kỳ độ trễ nào phù hợp
-                } catch (InterruptedException e) { throw new RuntimeException(e);}
-            }
-            if (isOneCorrect) {
-                for (int pn = 0; pn < pc; pn++) {
-                    if (play[pn].isAlive()) {
-                        // Nếu luồng vẫn đang chạy, bạn có thể gọi phương thức dừng luồng (ví dụ: interrupt)
-                        play[pn].interrupt(); // Ngắt luồng
-                    }
-                }
-                timer.interrupt();
-                Platform.runLater(() -> list.clear());
-                for (int pnum = 0; pnum < pc; pnum++) {
-                    try {
-                        play[pnum].join();
-                    } catch (InterruptedException e) {
-                        throw new RuntimeException(e);
-                    }
-                }
-//                break;
-            }
-
             try {
-//                timer.join();
-//                timer.interrupt();
+                timer.join();
                 sendScores(round);
-                if(round < ServerMain.rounds) {
-                    waitTimer = setWaitTimer(5);
+                if(round<ServerMain.rounds) {
+                    waitTimer=setWaitTimer(5);
                     sendResOut("ROUND OVER");
-                    Platform.runLater(() -> list.clear());
-
-//                    for(int pnum = 0; pnum < pc; pnum++) play[pnum].join();
+                    for(int pnum=0;pnum<pc;pnum++) play[pnum].join();
                     sendResOut("Round: "+round+"   word: "+word);
                     waitTimer.join();
-//                    waitTimer.interrupt();
                 }
                 else {
                     sendResOut("Winner:\n"+ServerMain.getWinners());
                     sendResOut("GAME OVER");
                     sendResOut("Round: "+round+"   word: "+word);
-//                    System.exit(0);
+                    System.exit(0);
                 }
             } catch (InterruptedException | IOException e) { e.printStackTrace(); }
+
         }
     }
+
+//    public void gameHandler() {
+//        int pc = ServerMain.playerCount;
+//        System.out.println(pc);
+//
+//        Image[] images = new Image[3];
+//        String[] words = new String[3];
+//
+//        // Load tất cả hình ảnh và từ khóa
+//        for (int i = 0; i < 3; i++) {
+//            File imageFile = getRandomImageFile();
+//            images[i] = new Image(imageFile.toURI().toString());
+//            words[i] = imageFile.getName().replace(",", " ").replace(".png", "");
+//        }
+//
+//        for (int round = 1; round <= ServerMain.rounds; round++) {
+//            isOneCorrect.set(false);
+//            Platform.runLater(this::ClearImageView);
+//            System.out.print("Round: " + round);
+//
+//            int i = round - 1;
+//            String word = words[i];
+//            String wordLength = getWordLength(word);
+//            System.out.println(", Word chosen: " + word);
+//
+//            // Gửi ảnh và từ khóa đến client
+//            try {
+//                sendResOut("Round: " + round + ", word: " + wordLength);
+//                sendImage(images[i]);
+//            } catch (IOException e) {
+//                e.printStackTrace();
+//            }
+//
+//            // Thiết lập từ và hiển thị ảnh trên UI
+//            int finalI = i;
+//            Platform.runLater(() -> setWord(words[finalI]));
+//            Platform.runLater(() -> loadImageFromServer(images[finalI]));
+//
+//            // Đếm ngược thời gian đoán
+//            timer = setTimer(90);
+//            Thread[] play = new Thread[pc]; // Luồng cho từng người chơi
+//
+//            // Khởi chạy luồng gamePlay cho từng người chơi
+//            for (int pnum = 0; pnum < pc; pnum++) {
+//                int finalPnum = pnum;
+//                play[pnum] = new Thread(() -> gamePlay(finalPnum, word, timer));
+//                play[pnum].start();
+//            }
+//
+//            // Chờ cho đến khi có người đoán đúng hoặc hết thời gian
+//            while (!isOneCorrect.get() && timer.isAlive()) {
+//                try {
+//                    Thread.sleep(100);
+//                } catch (InterruptedException e) {
+//                    throw new RuntimeException(e);
+//                }
+//            }
+//
+//            // Dừng tất cả các luồng khi có người đoán đúng
+//            if (isOneCorrect.get()) {
+//                for (Thread t : play) {
+//                    if (t.isAlive()) {
+//                        t.interrupt(); // Ngắt luồng
+//                    }
+//                }
+//                timer.interrupt(); // Dừng timer
+//                Platform.runLater(() -> list.clear()); // Xóa nội dung chat
+//            }
+//
+//            try {
+//                sendScores(round); // Gửi điểm số sau mỗi vòng
+//                if (round < ServerMain.rounds) {
+//                    sendResOut("ROUND OVER");
+//                    Thread waitTimer = setWaitTimer(5); // Đếm ngược thời gian giữa các vòng
+//                    waitTimer.join(); // Chờ thời gian chờ kết thúc
+//                } else {
+//                    sendResOut("Winner:\n" + ServerMain.getWinners());
+//                    sendResOut("GAME OVER");
+//                    System.exit(0);
+//                }
+//            } catch (IOException | InterruptedException e) {
+//                e.printStackTrace();
+//            }
+//        }
+//    }
 
     public void gamePlay(int pnum,String word,Thread timer){
         String pname=ServerMain.names.get(pnum);
@@ -331,12 +316,10 @@ public class CanvasController {
                     int score = ServerMain.scoreList.get(pnum);
                     ServerMain.scoreList.set(pnum, score+10);
                     sendResOut(pname+": Got it Correct!");
-                    isOneCorrect = true;
-                    break;
                 } else sendResOut(pname + ": " + guess);
 
             }
-            isOneCorrect = true;
+            isOneCorrect.set(true);
 
         } catch (IOException | ClassNotFoundException e) {
             try {

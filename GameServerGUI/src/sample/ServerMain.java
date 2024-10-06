@@ -46,7 +46,6 @@ public class ServerMain extends Application{
     }
 
     public static void main(String[] args) throws IOException, InterruptedException {
-//        getWords();
         getStartHandler();
         System.out.println("GameHandler Started..");
         launch(args);
@@ -78,7 +77,7 @@ public class ServerMain extends Application{
             ObjectOutputStream dOut=new ObjectOutputStream(client.getOutputStream());
             ObjectInputStream dIn=new ObjectInputStream(client.getInputStream());
             System.out.println("MAIN: Connected: "+i);
-            StartHandler sThread=new StartHandler(clients,i,dOut,dIn);
+            StartHandler sThread=new StartHandler(clients, i, dOut, dIn);
             oosList.add(dOut);
             oisList.add(dIn);
             clients.add(sThread);
