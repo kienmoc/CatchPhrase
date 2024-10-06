@@ -1,0 +1,77 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.text.*?>
+
+<BorderPane prefHeight="700.0" prefWidth="900.0" style="-fx-background-color: #003366;" xmlns="http://javafx.com/javafx/11.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="sample.HomeController">
+
+    <!-- Phần trên cùng chứa tiêu đề game và thông tin người dùng -->
+    <top>
+        <HBox spacing="10" alignment="CENTER_LEFT">
+            <padding>
+                <Insets top="20" right="20" bottom="20" left="20" />
+            </padding>
+            <!-- Tiêu đề game -->
+            <Label text="Catch Phrase" textFill="#ff9900e5">
+                <font>
+                    <Font name="Arial Bold" size="36.0" />
+                </font>
+            </Label>
+
+            <!-- Khu vực đẩy thông tin người dùng về phía phải -->
+            <Pane HBox.hgrow="ALWAYS"/>
+
+            <!-- Tên người dùng và điểm hiện tại -->
+            <VBox alignment="CENTER_RIGHT" spacing="5">
+                <Label fx:id="usernameLabel" text="Name" textFill="WHITE">
+                    <font>
+                        <Font name="Arial" size="18.0" />
+                    </font>
+                </Label>
+                <Label fx:id="scoreLabel" text="Score: 0" textFill="WHITE">
+                    <font>
+                        <Font name="Arial" size="18.0" />
+                    </font>
+                </Label>
+            </VBox>
+        </HBox>
+    </top>
+
+    <!-- Danh sách bảng xếp hạng ở bên trái -->
+    <left>
+        <VBox spacing="10">
+            <padding>
+                <Insets top="20" right="20" bottom="20" left="20" />
+            </padding>
+            <Label text="Leaderboard" textFill="#ff9900e5">
+                <font>
+                    <Font name="Arial Bold" size="24.0" />
+                </font>
+            </Label>
+            <ListView fx:id="rankingListView" prefWidth="200" prefHeight="600" />
+        </VBox>
+    </left>
+
+    <!-- Danh sách bạn bè online ở bên phải -->
+    <right>
+        <VBox spacing="10">
+            <padding>
+                <Insets top="20" right="20" bottom="20" left="20" />
+            </padding>
+            <Label text="Friend Online" textFill="#ff9900e5">
+                <font>
+                    <Font name="Arial Bold" size="24.0" />
+                </font>
+            </Label>
+            <ListView fx:id="friendsListView" prefWidth="200" prefHeight="600" />
+        </VBox>
+    </right>
+
+    <!-- Trung tâm có thể thêm các thành phần khác nếu cần -->
+    <center>
+        <!-- Bạn có thể thêm các thành phần trung tâm ở đây -->
+    </center>
+
+</BorderPane>

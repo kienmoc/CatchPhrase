@@ -1,0 +1,126 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.*?>
+<?import javafx.scene.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.text.*?>
+
+<BorderPane prefHeight="700.0" prefWidth="900.0" style="-fx-background-color: #003366;" xmlns="http://javafx.com/javafx/11.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="sample.IntroController">
+   <center>
+      <VBox prefHeight="478.0" prefWidth="800.0" BorderPane.alignment="CENTER">
+         <children>
+            <HBox prefHeight="86.0" prefWidth="800.0">
+               <children>
+                  <Label text="Enter Name: " textAlignment="CENTER" textFill="#ff9900">
+                     <HBox.margin>
+                        <Insets left="240.0" top="57.0" />
+                     </HBox.margin>
+                     <font>
+                        <Font name="Tlwg Mono Bold" size="18.0" />
+                     </font>
+                     <VBox.margin>
+                        <Insets />
+                     </VBox.margin></Label>
+                  <TextField fx:id="name" prefHeight="37.0" prefWidth="205.0" promptText="your name">
+                     <HBox.margin>
+                        <Insets left="15.0" top="50.0" />
+                     </HBox.margin>
+                     <font>
+                        <Font name="Tlwg Mono Bold" size="18.0" />
+                     </font>
+                     <cursor>
+                        <Cursor fx:constant="TEXT" />
+                     </cursor></TextField>
+               </children>
+            </HBox>
+            <HBox prefHeight="58.0" prefWidth="600.0">
+               <children>
+                  <Label text="Enter IP: " textFill="#ff9900">
+                     <HBox.margin>
+                        <Insets left="260.0" top="15.0" />
+                     </HBox.margin>
+                     <font>
+                        <Font name="Tlwg Mono Bold" size="18.0" />
+                     </font>
+                  </Label>
+                  <TextField fx:id="ip" prefHeight="37.0" prefWidth="206.0" promptText="server's IP">
+                     <HBox.margin>
+                        <Insets left="15.0" top="10.0" />
+                     </HBox.margin>
+                     <font>
+                        <Font name="Tlwg Mono Bold" size="18.0" />
+                     </font>
+                     <cursor>
+                        <Cursor fx:constant="TEXT" />
+                     </cursor>
+                  </TextField>
+               </children>
+            </HBox>
+            <HBox prefHeight="54.0" prefWidth="600.0">
+               <children>
+                  <Button fx:id="go" mnemonicParsing="false" onAction="#nextScene" style="-fx-background-color: #ff3300;" text="Go!" textFill="WHITE">
+                     <HBox.margin>
+                        <Insets left="500.0" top="20.0" />
+                     </HBox.margin>
+                     <font>
+                        <Font name="Tlwg Mono Bold" size="18.0" />
+                     </font>
+                     <cursor>
+                        <Cursor fx:constant="CLOSED_HAND" />
+                     </cursor>
+                  </Button>
+                  <Button fx:id="exit" mnemonicParsing="false" onAction="#onExit" style="-fx-background-color: #ff3300;" text="Exit" textFill="WHITE">
+                     <HBox.margin>
+                        <Insets left="30.0" top="20.0" />
+                     </HBox.margin>
+                     <font>
+                        <Font name="Tlwg Mono Bold" size="18.0" />
+                     </font>
+                     <cursor>
+                        <Cursor fx:constant="CLOSED_HAND" />
+                     </cursor></Button>
+               </children>
+            </HBox>
+         </children>
+      </VBox>
+   </center>
+   <top>
+      <VBox prefHeight="270.0" prefWidth="900.0" BorderPane.alignment="CENTER">
+         <children>
+            <Label fx:id="title" alignment="CENTER" contentDisplay="CENTER" prefHeight="132.0" prefWidth="902.0" style="-fx-background-color: #ff3300;" text="Pictionary" textAlignment="CENTER" textFill="WHITE" wrapText="true">
+               <font>
+                  <Font name="Tlwg Mono Bold" size="75.0" />
+               </font>
+               <VBox.margin>
+                  <Insets />
+               </VBox.margin>
+            </Label>
+            <Label prefHeight="141.0" prefWidth="843.0" text="Welcome to the game of Pictionary. Enter details in the fields below and press Go to connect to the server. Server will start the game soon..." textAlignment="CENTER" textFill="WHITE" textOverrun="CLIP" wrapText="true">
+               <font>
+                  <Font name="Tlwg Mono Bold" size="22.0" />
+               </font>
+               <padding>
+                  <Insets left="10.0" />
+               </padding>
+               <VBox.margin>
+                  <Insets left="30.0" />
+               </VBox.margin>
+            </Label>
+         </children>
+      </VBox>
+   </top>
+   <bottom>
+      <Label text="By: Tarun Srivatsa &amp; Shivanand" textFill="#b5b5b5" BorderPane.alignment="CENTER">
+         <font>
+            <Font name="Tlwg Mono Bold" size="20.0" />
+         </font>
+         <padding>
+            <Insets bottom="20.0" />
+         </padding>
+         <cursor>
+            <Cursor fx:constant="DISAPPEAR" />
+         </cursor>
+      </Label>
+   </bottom>
+</BorderPane>

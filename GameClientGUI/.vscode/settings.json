@@ -1,0 +1,15 @@
+{
+    "java.project.sourcePaths": [
+        "src"
+    ],
+    "java.project.referencedLibraries": [
+        "d:\\JDK\\javafx-sdk-17.0.12\\lib\\javafx.base.jar",
+        "d:\\JDK\\javafx-sdk-17.0.12\\lib\\javafx.controls.jar",
+        "d:\\JDK\\javafx-sdk-17.0.12\\lib\\javafx.fxml.jar",
+        "d:\\JDK\\javafx-sdk-17.0.12\\lib\\javafx.graphics.jar",
+        "d:\\JDK\\javafx-sdk-17.0.12\\lib\\javafx.media.jar",
+        "d:\\JDK\\javafx-sdk-17.0.12\\lib\\javafx.swing.jar",
+        "d:\\JDK\\javafx-sdk-17.0.12\\lib\\javafx.web.jar",
+        "d:\\JDK\\javafx-sdk-17.0.12\\lib\\javafx-swt.jar"
+    ]
+}
