@@ -48,9 +48,9 @@ public class UserData {
 
     public void setSocket(Socket s) throws IOException {
         this.server=s;
-        ois=new ObjectInputStream(server.getInputStream());
         oos=new ObjectOutputStream(server.getOutputStream());
+        this.oos.flush();
+        ois=new ObjectInputStream(server.getInputStream());
         oos.writeObject(username);
-        oos.flush();
     }
 }

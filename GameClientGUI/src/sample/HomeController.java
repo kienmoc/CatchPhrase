@@ -3,21 +3,23 @@ package sample;
 import javafx.application.Platform;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
+import javafx.geometry.Pos;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
-import javafx.scene.control.Label;
-import javafx.scene.control.ListView;
+import javafx.scene.control.*;
+import javafx.scene.layout.BorderPane;
+import javafx.scene.layout.HBox;
 import javafx.stage.Stage;
 
 import javax.swing.*;
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStreamReader;
+import java.io.*;
 import java.net.Socket;
 import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.Map;
+import java.util.Optional;
 
 public class HomeController {
 
@@ -34,24 +36,55 @@ public class HomeController {
     private ListView<String> friendsListView;
 
     private UserData player;
+    private ObjectOutputStream dOut;
+    private ObjectInputStream dIn;
+
+    private Map<String, String> friendsMap;
 
     // Phương thức khởi tạo tự động gọi sau khi FXML được tải
     public void initialize() {
-        // Có thể khởi tạo các thành phần không phụ thuộc vào UserData tại đây
+        friendsListView.setCellFactory(param -> new ListCell<String>() {
+            private HBox content;
+            private Label usernameLabel;
+            private Button inviteButton;
+
+            {
+                usernameLabel = new Label();
+                inviteButton = new Button("Invite");
+                inviteButton.setOnAction(event -> {
+                    String username = getItem();
+                    handleInvite(username);
+                });
+                content = new HBox(10, usernameLabel, inviteButton);
+                content.setAlignment(Pos.CENTER_LEFT);
+            }
+
+            @Override
+            protected void updateItem(String username, boolean empty) {
+                super.updateItem(username, empty);
+                if (empty || username == null) {
+                    setText(null);
+                    setGraphic(null);
+                } else {
+                    usernameLabel.setText(username);
+                    setGraphic(content);
+                }
+            }
+        });
     }
 
     // Phương thức để nhận dữ liệu từ IntroController
     public void setUserData(UserData player) {
         this.player = player;
+        dIn = player.ois;
+        dOut = player.oos;
         // Cập nhật thông tin người dùng
         usernameLabel.setText(player.getUsername());
         scoreLabel.setText("Score: " + player.getScore());
 
         // Tải bảng xếp hạng từ cơ sở dữ liệu
         loadRankings();
-
-        // Kết nối để nhận danh sách bạn bè online
-        loadFriendsOnline();
+        listenForData();
     }
 
     // Phương thức tải bảng xếp hạng từ cơ sở dữ liệu
@@ -76,37 +109,151 @@ public class HomeController {
         }
     }
 
-    // Phương thức kết nối socket để nhận danh sách bạn bè online
-    private void loadFriendsOnline() {
-        // Giả sử server gửi danh sách bạn bè online theo định dạng dòng văn bản, mỗi bạn bè trên một dòng
-        Socket socket = player.getSocket();
-        if (socket == null || socket.isClosed()) {
-            JOptionPane.showMessageDialog(null, "Không thể kết nối tới server để lấy danh sách bạn bè online.", "Lỗi Kết Nối", JOptionPane.ERROR_MESSAGE);
-            return;
-        }
+    private void updateFriendList(Map<String, String> friendsMap) {
+        Platform.runLater(() -> {
+            friendsListView.getItems().clear();
 
-        // Tạo một luồng mới để lắng nghe dữ liệu từ server
+            for (String username : friendsMap.keySet()) {
+                friendsListView.getItems().add(username); // Chỉ hiển thị username
+            }
+        });
+    }
+
+    private void handleInvite(String username) {
+        try {
+            dOut.writeObject("Invite:" + username);
+            dOut.flush();
+            System.out.println("Invite request sent to " + username);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    private void listenForData() {
         new Thread(() -> {
             try {
-                BufferedReader in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
-                String message;
-                while ((message = in.readLine()) != null) {
-                    // Giả sử server gửi danh sách bạn bè online như một chuỗi JSON hoặc theo định dạng cụ thể
-                    // Ở đây, chúng ta giả sử mỗi bạn bè online là một dòng văn bản
-                    String friend = message.trim();
-                    if (!friend.isEmpty()) {
-                        Platform.runLater(() -> {
-                            if (!friendsListView.getItems().contains(friend)) {
-                                friendsListView.getItems().add(friend);
-                            }
-                        });
+                while (true) {
+                    Object data = dIn.readObject();
+                    if (data instanceof Map) {
+                        friendsMap = (Map<String, String>) data;
+                        updateFriendList(friendsMap);
+                    } else if (data instanceof String) {
+                        String message = (String) data;
+                        if (message.startsWith("Invite from")) {
+//                            Platform.runLater(() -> {
+//                                Alert alert = new Alert(Alert.AlertType.INFORMATION);
+//                                alert.setTitle("Invite Received");
+//                                alert.setHeaderText(null);
+//                                alert.setContentText(message);
+//                                alert.showAndWait();
+//                            });
+                            Platform.runLater(() -> {
+                                showInviteDialog(message);
+                            });
+                        } else if (message.startsWith("Enter Lobby")) {
+                            Platform.runLater(() -> {
+                                System.out.println("Im entering lobby hihi");
+                                enterLobby();
+                            });
+                        }
                     }
                 }
-            } catch (IOException e) {
+            } catch (IOException | ClassNotFoundException e) {
                 e.printStackTrace();
-                Platform.runLater(() -> JOptionPane.showMessageDialog(null, "Lost connection to server.", "Connection error", JOptionPane.ERROR_MESSAGE));
             }
         }).start();
+    }
+
+    private void showInviteDialog(String message) {
+        Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
+        alert.setTitle("Invite Received");
+        alert.setHeaderText(null);
+        alert.setContentText(message);
+
+        // Tạo các nút Accept và Decline
+        ButtonType acceptButton = new ButtonType("Accept");
+        ButtonType declineButton = new ButtonType("Decline", ButtonBar.ButtonData.CANCEL_CLOSE);
+
+        // Thiết lập các nút cho hộp thoại
+        alert.getButtonTypes().setAll(acceptButton, declineButton);
+
+        // Hiển thị hộp thoại và đợi phản hồi từ người dùng
+        Optional<ButtonType> result = alert.showAndWait();
+        if (result.isPresent() && result.get() == acceptButton) {
+            // Người dùng nhấn Accept
+            acceptInvite();
+        } else {
+            // Người dùng nhấn Decline hoặc đóng hộp thoại
+            declineInvite();
+        }
+    }
+
+    private void acceptInvite() {
+        try {
+            // Gửi phản hồi chấp nhận tới máy chủ nếu cần
+            dOut.writeObject("Accept:" + player.getUsername());
+            dOut.flush();
+
+            // Tải và chuyển đến scene lobby.fxml
+//            FXMLLoader loader = new FXMLLoader(getClass().getResource("lobby.fxml"));
+//            Parent root=loader.load();
+//            LobbyController controller = loader.getController();
+//            controller.setUserData(player);
+//            // Lấy Stage hiện tại từ một node đã có (ví dụ: usernameLabel)
+//            Stage stage = (Stage) usernameLabel.getScene().getWindow();
+//            stage.setScene(new Scene(root));
+//            stage.setTitle("Catch The Word");
+
+        } catch (IOException e) {
+            e.printStackTrace();
+            // Hiển thị thông báo lỗi nếu không thể chuyển scene
+            Alert errorAlert = new Alert(Alert.AlertType.ERROR);
+            errorAlert.setTitle("Error");
+            errorAlert.setHeaderText(null);
+            errorAlert.setContentText("Unable to load lobby scene.");
+            errorAlert.showAndWait();
+        }
+    }
+
+    private void declineInvite() {
+        try {
+            // Gửi phản hồi từ chối tới máy chủ nếu cần
+            dOut.writeObject("Decline Invite");
+            dOut.flush();
+            System.out.println("Invite declined.");
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    private void enterLobby() {
+        try {
+            // Tải và chuyển đến scene lobby.fxml
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("lobby.fxml"));
+            Parent root = loader.load();
+
+            // Nếu bạn cần truyền dữ liệu đến LobbyController, làm như sau:
+            LobbyController controller = loader.getController();
+            if (controller != null) {
+                controller.setUserData(this.player);
+            }
+
+
+            // Lấy Stage hiện tại từ một node đã có (ví dụ: usernameLabel)
+            BorderPane borderPane = (BorderPane) usernameLabel.getScene().getRoot(); // Lấy root là BorderPane
+            Stage stage = (Stage) borderPane.getScene().getWindow();
+//            Stage stage = (Stage) usernameLabel.getScene().getWindow();
+//            stage.setScene(new Scene(root));
+            stage.show();
+        } catch (IOException e) {
+            e.printStackTrace();
+            // Hiển thị thông báo lỗi nếu không thể chuyển scene
+            Alert errorAlert = new Alert(Alert.AlertType.ERROR);
+            errorAlert.setTitle("Error");
+            errorAlert.setHeaderText(null);
+            errorAlert.setContentText("Unable to load lobby scene.");
+            errorAlert.showAndWait();
+        }
     }
 
     // Phương thức để thoát ứng dụng

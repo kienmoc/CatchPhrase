@@ -7,11 +7,10 @@ import javafx.scene.Scene;
 import javafx.stage.Stage;
 
 import java.io.*;
+import java.net.InetAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
-import java.util.ArrayList;
-import java.util.Locale;
-import java.util.Scanner;
+import java.util.*;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
@@ -25,7 +24,7 @@ public class ServerMain extends Application{
     public static ArrayList<ObjectInputStream> oisList=new ArrayList<>();
     public static ArrayList<OutputStream> canvasOut=new ArrayList<>();
 
-    public static int playerCount=1;
+    public static int playerCount=2;
     public static int rounds=3;
 
     public static ArrayList<String> names=new ArrayList<>();
@@ -81,12 +80,47 @@ public class ServerMain extends Application{
             oosList.add(dOut);
             oisList.add(dIn);
             clients.add(sThread);
+            socketList.add(client);
+
+            String username = null; // Đọc tên người dùng từ client
+            try {
+                username = (String) dIn.readObject();
+                names.add(username);
+            } catch (ClassNotFoundException e) {
+                throw new RuntimeException(e);
+            }
+
             pool.execute(sThread);
         }
+
+        sendFriendsList();
+
         pool.shutdown();
         pool.awaitTermination(10, TimeUnit.SECONDS);
         System.out.println("StartHandler Closed..");
 //        System.out.println("StartHandler Ready to accept more clients..");
+    }
+
+    public static void sendFriendsList() throws IOException {
+        Map<String, String> friendsMap = new HashMap<>();
+        StringBuilder friendsList = new StringBuilder();
+
+        for (int i = 0; i < names.size(); i++) {
+//            Socket socket = socketList.get(i);
+//            InetAddress address = socket.getInetAddress(); // Lấy địa chỉ IP
+//            String friendInfo = names.get(i) + " (" + address.getHostAddress() + ")"; // Kết hợp tên và IP
+//            friendsList.append(friendInfo).append("\n");
+//            friendsMap.put(names.get(i), friendInfo);
+            Socket socket = socketList.get(i);
+            InetAddress address = socket.getInetAddress(); // Lấy địa chỉ IP
+            String friendInfo = address.getHostAddress(); // Lấy địa chỉ IP
+            friendsMap.put(names.get(i), friendInfo);
+
+        }
+        for (ObjectOutputStream oos : oosList) {
+            oos.writeObject(friendsMap); // Gửi danh sách bạn bè
+            oos.flush(); // Đảm bảo dữ liệu được gửi
+        }
     }
 
     static String getWinners(){
