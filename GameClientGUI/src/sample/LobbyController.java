@@ -10,6 +10,9 @@ import javafx.scene.control.TextArea;
 import javafx.stage.Stage;
 import java.io.IOException;
 import java.io.ObjectInputStream;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
 
 import static java.lang.Thread.sleep;
 
@@ -22,21 +25,30 @@ public class LobbyController {
     private ObjectInputStream dIn;
     private UserData player;
 
+    private ExecutorService executor;
+    private Future<?> readerTask;
+
     public void initialize() {
-        playerList.appendText("1. SERVER [Artist]\n");
+
+    }
+
+    public void setUserData(UserData u) throws IOException {
+        player=u;
+        dIn=player.ois;
+        getPlayers();
     }
 
     public void getPlayers(){
         new Thread(() -> {
-            int n;
             try {
-                n=dIn.readInt();
-                System.out.println("number of friends: "+n);
-                for(int i=2;i<=n+1;i++){
+                for(int i=1;i<=2;i++){
                     int finalI = i;
                     String friend = (String) dIn.readObject();
-                    Platform.runLater(() -> playerList.appendText(finalI + ". " + friend + "\n"));
-                    System.out.println(i + ": " + friend);
+                    if(!friend.trim().startsWith("Word:")) {
+                        System.out.println("Friend: " + friend);
+                        Platform.runLater(() -> playerList.appendText(finalI + ". " + friend + "\n"));
+                        System.out.println(i + ": " + friend);
+                    }
                 }
                 setTimer(5);
             } catch (IOException | ClassNotFoundException e) {e.printStackTrace();}
@@ -44,22 +56,19 @@ public class LobbyController {
     }
 
     public void setTimer(int duration){
-        new Thread(() -> {
+        executor = Executors.newSingleThreadExecutor();
+        readerTask = executor.submit(() -> {
             try {
-                for (int dur=duration;dur>=1;dur--) {
+                for (int dur = duration; dur >= 1; dur--) {
                     int finalDur = dur;
-                    Platform.runLater(() -> displayTimer.setText("Game Starts in: "+finalDur));
+                    Platform.runLater(() -> displayTimer.setText("Game Starts in: " + finalDur));
                     sleep(1000);
                 }
-                Platform.runLater(()->nextScene());
-            } catch (InterruptedException e) { e.printStackTrace(); }
-        }).start();
-    }
-
-    public void setUserData(UserData u) throws IOException {
-        player=u;
-        dIn=player.ois;
-        getPlayers();
+                Platform.runLater(() -> nextScene());
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+        });
     }
 
     public void nextScene(){

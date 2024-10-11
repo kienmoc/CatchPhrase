@@ -61,7 +61,7 @@ public class IntroController {
 //                System.out.println(player.getUsername());
                 Stage stage = (Stage) go.getScene().getWindow();
                 stage.setScene(new Scene(root));
-                stage.setTitle("Catch The Word");
+                stage.setTitle("Đuổi hình bắt chữ");
                 stage.show();
             } catch (IOException e) {e.printStackTrace();}
         }

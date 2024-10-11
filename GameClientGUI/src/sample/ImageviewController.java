@@ -98,27 +98,6 @@ public class ImageviewController {
         allResponses();
     }
 
-//    public void imageReceiver() throws IOException {
-//        InputStream is=player.imageIn.getInputStream();
-//        new Thread(()->{
-//            byte[] imSize,byteImage;
-//            int sizeInt;
-//            BufferedImage bIn;
-//            try {
-//                while(!gameOver){
-//                    imSize = new byte[4];
-//                    is.read(imSize);
-//                    sizeInt = ByteBuffer.wrap(imSize).asIntBuffer().get();
-//                    byteImage = is.readNBytes(sizeInt);
-//                    bIn=ImageIO.read(new ByteArrayInputStream(byteImage));
-//                    Image im = SwingFXUtils.toFXImage(bIn,null);
-//                    Platform.runLater(()->imView.setImage(im));
-//                }
-//                is.close();
-//                player.imageIn.close();
-//            } catch (IOException e) {e.printStackTrace();}
-//        }).start();
-//    }
     public void imageReceiver() throws IOException {
         InputStream is = player.imageIn.getInputStream();
         new Thread(() -> {

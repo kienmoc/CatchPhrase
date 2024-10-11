@@ -21,21 +21,15 @@ public class CanvasController {
     @FXML
     private Canvas canvas;
     @FXML
-    private ColorPicker colorPicker;
-    @FXML
     private TextField message;
-    @FXML
-    private CheckBox eraser;
+
     @FXML
     private TextArea list;
-    @FXML
-    private Slider brushSize;
-    @FXML
-    private Button clear;
+
     @FXML
     private Label displayTimer, wordLabel;
     private GraphicsContext g;
-//xxx
+    //xxx
     @FXML
     private ImageView imageView;
     private final String imagesPath = "images";
@@ -58,7 +52,7 @@ public class CanvasController {
     }
 //xxx
 
-//    File newFile = new File("cursor.png");
+    //    File newFile = new File("cursor.png");
 //    private final Image penCursor = new Image(newFile.toURI().toString());
     private CheckStatus checker = new CheckStatus();
 
@@ -77,7 +71,7 @@ public class CanvasController {
     }
 
     public void setWord(String word){
-        wordLabel.setText("DRAW THIS: "+word);
+        wordLabel.setText("GUESS THIS: "+word);
     }
 
     public void onSave() {
@@ -169,7 +163,7 @@ public class CanvasController {
             words[i] = imageFile.getName().replace(",", " ").replace(".png", "");
         }
 
-        for(int round=1 ; round<=ServerMain.rounds ; round++) {
+        for(int round = 1; round <= ServerMain.rounds; round++) {
 
             Platform.runLater(this::ClearImageView);
             Platform.runLater(() -> {
@@ -190,7 +184,7 @@ public class CanvasController {
                 setWord(words[finalI]);
                 loadImageFromServer(images[finalI]);
             });
-            Thread timer=setTimer(30),waitTimer;
+            Thread timer=setTimer(35),waitTimer;
             Thread[] play=new Thread[pc];
             for(int pnum=0;pnum<pc;pnum++) {
                 int finalPnum = pnum;
@@ -218,104 +212,20 @@ public class CanvasController {
         }
     }
 
-//    public void gameHandler() {
-//        int pc = ServerMain.playerCount;
-//        System.out.println(pc);
-//
-//        Image[] images = new Image[3];
-//        String[] words = new String[3];
-//
-//        // Load tất cả hình ảnh và từ khóa
-//        for (int i = 0; i < 3; i++) {
-//            File imageFile = getRandomImageFile();
-//            images[i] = new Image(imageFile.toURI().toString());
-//            words[i] = imageFile.getName().replace(",", " ").replace(".png", "");
-//        }
-//
-//        for (int round = 1; round <= ServerMain.rounds; round++) {
-//            isOneCorrect.set(false);
-//            Platform.runLater(this::ClearImageView);
-//            System.out.print("Round: " + round);
-//
-//            int i = round - 1;
-//            String word = words[i];
-//            String wordLength = getWordLength(word);
-//            System.out.println(", Word chosen: " + word);
-//
-//            // Gửi ảnh và từ khóa đến client
-//            try {
-//                sendResOut("Round: " + round + ", word: " + wordLength);
-//                sendImage(images[i]);
-//            } catch (IOException e) {
-//                e.printStackTrace();
-//            }
-//
-//            // Thiết lập từ và hiển thị ảnh trên UI
-//            int finalI = i;
-//            Platform.runLater(() -> setWord(words[finalI]));
-//            Platform.runLater(() -> loadImageFromServer(images[finalI]));
-//
-//            // Đếm ngược thời gian đoán
-//            timer = setTimer(90);
-//            Thread[] play = new Thread[pc]; // Luồng cho từng người chơi
-//
-//            // Khởi chạy luồng gamePlay cho từng người chơi
-//            for (int pnum = 0; pnum < pc; pnum++) {
-//                int finalPnum = pnum;
-//                play[pnum] = new Thread(() -> gamePlay(finalPnum, word, timer));
-//                play[pnum].start();
-//            }
-//
-//            // Chờ cho đến khi có người đoán đúng hoặc hết thời gian
-//            while (!isOneCorrect.get() && timer.isAlive()) {
-//                try {
-//                    Thread.sleep(100);
-//                } catch (InterruptedException e) {
-//                    throw new RuntimeException(e);
-//                }
-//            }
-//
-//            // Dừng tất cả các luồng khi có người đoán đúng
-//            if (isOneCorrect.get()) {
-//                for (Thread t : play) {
-//                    if (t.isAlive()) {
-//                        t.interrupt(); // Ngắt luồng
-//                    }
-//                }
-//                timer.interrupt(); // Dừng timer
-//                Platform.runLater(() -> list.clear()); // Xóa nội dung chat
-//            }
-//
-//            try {
-//                sendScores(round); // Gửi điểm số sau mỗi vòng
-//                if (round < ServerMain.rounds) {
-//                    sendResOut("ROUND OVER");
-//                    Thread waitTimer = setWaitTimer(5); // Đếm ngược thời gian giữa các vòng
-//                    waitTimer.join(); // Chờ thời gian chờ kết thúc
-//                } else {
-//                    sendResOut("Winner:\n" + ServerMain.getWinners());
-//                    sendResOut("GAME OVER");
-//                    System.exit(0);
-//                }
-//            } catch (IOException | InterruptedException e) {
-//                e.printStackTrace();
-//            }
-//        }
-//    }
-
     public void gamePlay(int pnum,String word,Thread timer){
         String pname=ServerMain.names.get(pnum);
         try {
             ObjectInputStream ois = ServerMain.oisList.get(pnum);
             while (timer.isAlive()){
                 String guess = (String) ois.readObject();
+                System.out.println("Player's message is: " + guess);
                 if(guess.equals("IM_DONE_GUESSING")) break;
 
                 Platform.runLater(()->list.appendText(pname+": "+guess+"\n"));
                 if (word.equals(guess.toLowerCase()) && timer.isAlive()){
                     int score = ServerMain.scoreList.get(pnum);
                     ServerMain.scoreList.set(pnum, score+10);
-                    sendResOut(pname+": Got it Correct!");
+                    sendResOut(pname + ": Got it Correct!");
                 } else sendResOut(pname + ": " + guess);
 
             }

@@ -7,7 +7,6 @@ import javafx.scene.Scene;
 import javafx.stage.Stage;
 
 import java.io.*;
-import java.net.InetAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.*;
@@ -36,18 +35,18 @@ public class ServerMain extends Application{
     Stage stage;
     @Override
     public void start(Stage primaryStage) throws Exception{
-        stage=primaryStage;
-        Parent root = FXMLLoader.load(getClass().getResource("canvas.fxml"));
-        stage.setTitle("Pictionary SERVER");
-        Scene scene=new Scene(root);
-        stage.setScene(scene);
-        stage.show();
+//        stage=primaryStage;
+//        Parent root = FXMLLoader.load(getClass().getResource("canvas.fxml"));
+//        stage.setTitle("Pictionary SERVER");
+//        Scene scene=new Scene(root);
+//        stage.setScene(scene);
+//        stage.show();
     }
 
     public static void main(String[] args) throws IOException, InterruptedException {
         getStartHandler();
         System.out.println("GameHandler Started..");
-        launch(args);
+//        launch(args);
     }
 
     private static void getStartHandler() throws InterruptedException, IOException {
@@ -75,25 +74,13 @@ public class ServerMain extends Application{
             client=listener.accept();
             ObjectOutputStream dOut=new ObjectOutputStream(client.getOutputStream());
             ObjectInputStream dIn=new ObjectInputStream(client.getInputStream());
-            System.out.println("MAIN: Connected: "+i);
+            System.out.println("MAIN: Connected: "+ i);
             StartHandler sThread=new StartHandler(clients, i, dOut, dIn);
             oosList.add(dOut);
             oisList.add(dIn);
             clients.add(sThread);
-            socketList.add(client);
-
-            String username = null; // Đọc tên người dùng từ client
-            try {
-                username = (String) dIn.readObject();
-                names.add(username);
-            } catch (ClassNotFoundException e) {
-                throw new RuntimeException(e);
-            }
-
             pool.execute(sThread);
         }
-
-        sendFriendsList();
 
         pool.shutdown();
         pool.awaitTermination(10, TimeUnit.SECONDS);
@@ -101,27 +88,18 @@ public class ServerMain extends Application{
 //        System.out.println("StartHandler Ready to accept more clients..");
     }
 
-    public static void sendFriendsList() throws IOException {
+    public static Map<String, String> getFriendsMap(String excludeUsername) {
         Map<String, String> friendsMap = new HashMap<>();
-        StringBuilder friendsList = new StringBuilder();
-
         for (int i = 0; i < names.size(); i++) {
-//            Socket socket = socketList.get(i);
-//            InetAddress address = socket.getInetAddress(); // Lấy địa chỉ IP
-//            String friendInfo = names.get(i) + " (" + address.getHostAddress() + ")"; // Kết hợp tên và IP
-//            friendsList.append(friendInfo).append("\n");
-//            friendsMap.put(names.get(i), friendInfo);
-            Socket socket = socketList.get(i);
-            InetAddress address = socket.getInetAddress(); // Lấy địa chỉ IP
-            String friendInfo = address.getHostAddress(); // Lấy địa chỉ IP
-            friendsMap.put(names.get(i), friendInfo);
-
+            String name = names.get(i);
+            if (!name.equals(excludeUsername)) {
+                String ipAddress = socketList.get(i).getInetAddress().getHostAddress();
+                friendsMap.put(name, ipAddress);
+            }
         }
-        for (ObjectOutputStream oos : oosList) {
-            oos.writeObject(friendsMap); // Gửi danh sách bạn bè
-            oos.flush(); // Đảm bảo dữ liệu được gửi
-        }
+        return friendsMap;
     }
+
 
     static String getWinners(){
         int i=0,ind=0,max=0;

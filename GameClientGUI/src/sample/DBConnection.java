@@ -29,7 +29,7 @@ public class DBConnection {
     public static int getScoreFromUser(String username) {
         String query = "SELECT point from user WHERE username = ?";
         try (Connection conn = getConnection();
-            PreparedStatement stmt = conn.prepareStatement(query)) {
+             PreparedStatement stmt = conn.prepareStatement(query)) {
             stmt.setString(1, username);
             ResultSet rs = stmt.executeQuery();
             if(rs.next()) {

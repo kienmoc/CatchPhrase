@@ -20,6 +20,10 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.Map;
 import java.util.Optional;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 public class HomeController {
 
@@ -40,6 +44,11 @@ public class HomeController {
     private ObjectInputStream dIn;
 
     private Map<String, String> friendsMap;
+
+    //    private volatile boolean listening = true;
+    private AtomicBoolean listening = new AtomicBoolean(true);
+    private ExecutorService executor;
+    private Future<?> readerTask;
 
     // Phương thức khởi tạo tự động gọi sau khi FXML được tải
     public void initialize() {
@@ -129,39 +138,70 @@ public class HomeController {
         }
     }
 
+    //    private void listenForData() {
+//        new Thread(() -> {
+//            try {
+//                while (listening) {
+//                    Object data = dIn.readObject();
+//                    System.out.println("Im listening ...");
+//                    if (data instanceof Map) {
+//                        friendsMap = (Map<String, String>) data;
+//                        updateFriendList(friendsMap);
+//                    } else if (data instanceof String) {
+//                        String message = (String) data;
+//                        if (message.startsWith("Invite from")) {
+////                            Platform.runLater(() -> {
+////                                Alert alert = new Alert(Alert.AlertType.INFORMATION);
+////                                alert.setTitle("Invite Received");
+////                                alert.setHeaderText(null);
+////                                alert.setContentText(message);
+////                                alert.showAndWait();
+////                            });
+//                            Platform.runLater(() -> {
+//                                showInviteDialog(message);
+//                            });
+//                        } else if (message.startsWith("Enter Lobby")) {
+//
+//                            Platform.runLater(() -> {
+//                                enterLobby();
+//                            });
+//                        }
+//                    }
+//                }
+//            } catch (IOException | ClassNotFoundException e) {
+//                e.printStackTrace();
+//            }
+//        }).start();
+//    }
     private void listenForData() {
-        new Thread(() -> {
+        executor = Executors.newSingleThreadExecutor();
+        readerTask = executor.submit(() -> {
             try {
-                while (true) {
+                while (listening.get()) {
                     Object data = dIn.readObject();
+                    System.out.println("Im listening ...");
                     if (data instanceof Map) {
                         friendsMap = (Map<String, String>) data;
                         updateFriendList(friendsMap);
                     } else if (data instanceof String) {
                         String message = (String) data;
                         if (message.startsWith("Invite from")) {
-//                            Platform.runLater(() -> {
-//                                Alert alert = new Alert(Alert.AlertType.INFORMATION);
-//                                alert.setTitle("Invite Received");
-//                                alert.setHeaderText(null);
-//                                alert.setContentText(message);
-//                                alert.showAndWait();
-//                            });
                             Platform.runLater(() -> {
                                 showInviteDialog(message);
                             });
                         } else if (message.startsWith("Enter Lobby")) {
+                            Thread.sleep(1000);
+//                            listening.set(false);
                             Platform.runLater(() -> {
-                                System.out.println("Im entering lobby hihi");
                                 enterLobby();
                             });
                         }
                     }
                 }
-            } catch (IOException | ClassNotFoundException e) {
+            } catch (IOException | ClassNotFoundException | InterruptedException e) {
                 e.printStackTrace();
             }
-        }).start();
+        });
     }
 
     private void showInviteDialog(String message) {
@@ -179,31 +219,22 @@ public class HomeController {
 
         // Hiển thị hộp thoại và đợi phản hồi từ người dùng
         Optional<ButtonType> result = alert.showAndWait();
+
+        String targetUser = message.split(" ")[message.split(" ").length - 1];
+
         if (result.isPresent() && result.get() == acceptButton) {
             // Người dùng nhấn Accept
-            acceptInvite();
+            acceptInvite(targetUser);
         } else {
             // Người dùng nhấn Decline hoặc đóng hộp thoại
             declineInvite();
         }
     }
 
-    private void acceptInvite() {
+    private void acceptInvite(String targetUser) {
         try {
-            // Gửi phản hồi chấp nhận tới máy chủ nếu cần
-            dOut.writeObject("Accept:" + player.getUsername());
+            dOut.writeObject("Accept:" + targetUser);
             dOut.flush();
-
-            // Tải và chuyển đến scene lobby.fxml
-//            FXMLLoader loader = new FXMLLoader(getClass().getResource("lobby.fxml"));
-//            Parent root=loader.load();
-//            LobbyController controller = loader.getController();
-//            controller.setUserData(player);
-//            // Lấy Stage hiện tại từ một node đã có (ví dụ: usernameLabel)
-//            Stage stage = (Stage) usernameLabel.getScene().getWindow();
-//            stage.setScene(new Scene(root));
-//            stage.setTitle("Catch The Word");
-
         } catch (IOException e) {
             e.printStackTrace();
             // Hiển thị thông báo lỗi nếu không thể chuyển scene
@@ -227,6 +258,12 @@ public class HomeController {
     }
 
     private void enterLobby() {
+        listening.set(false);
+//        if(listening.get() == false) {
+//            System.out.println("Noooo, i can't listening right now");
+//        }
+        readerTask.cancel(true);
+        executor.shutdownNow();
         try {
             // Tải và chuyển đến scene lobby.fxml
             FXMLLoader loader = new FXMLLoader(getClass().getResource("lobby.fxml"));
@@ -238,12 +275,10 @@ public class HomeController {
                 controller.setUserData(this.player);
             }
 
-
             // Lấy Stage hiện tại từ một node đã có (ví dụ: usernameLabel)
             BorderPane borderPane = (BorderPane) usernameLabel.getScene().getRoot(); // Lấy root là BorderPane
             Stage stage = (Stage) borderPane.getScene().getWindow();
-//            Stage stage = (Stage) usernameLabel.getScene().getWindow();
-//            stage.setScene(new Scene(root));
+            stage.setScene(new Scene(root));
             stage.show();
         } catch (IOException e) {
             e.printStackTrace();
@@ -253,6 +288,22 @@ public class HomeController {
             errorAlert.setHeaderText(null);
             errorAlert.setContentText("Unable to load lobby scene.");
             errorAlert.showAndWait();
+        }
+    }
+
+    public void closeConnection() {
+        try {
+            if (dIn != null) {
+                dIn.close();
+            }
+            if (dOut != null) {
+                dOut.close();
+            }
+            if (player.getSocket() != null && !player.getSocket().isClosed()) {
+                player.getSocket().close();
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
         }
     }
 
