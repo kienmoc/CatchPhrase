@@ -138,41 +138,6 @@ public class HomeController {
         }
     }
 
-    //    private void listenForData() {
-//        new Thread(() -> {
-//            try {
-//                while (listening) {
-//                    Object data = dIn.readObject();
-//                    System.out.println("Im listening ...");
-//                    if (data instanceof Map) {
-//                        friendsMap = (Map<String, String>) data;
-//                        updateFriendList(friendsMap);
-//                    } else if (data instanceof String) {
-//                        String message = (String) data;
-//                        if (message.startsWith("Invite from")) {
-////                            Platform.runLater(() -> {
-////                                Alert alert = new Alert(Alert.AlertType.INFORMATION);
-////                                alert.setTitle("Invite Received");
-////                                alert.setHeaderText(null);
-////                                alert.setContentText(message);
-////                                alert.showAndWait();
-////                            });
-//                            Platform.runLater(() -> {
-//                                showInviteDialog(message);
-//                            });
-//                        } else if (message.startsWith("Enter Lobby")) {
-//
-//                            Platform.runLater(() -> {
-//                                enterLobby();
-//                            });
-//                        }
-//                    }
-//                }
-//            } catch (IOException | ClassNotFoundException e) {
-//                e.printStackTrace();
-//            }
-//        }).start();
-//    }
     private void listenForData() {
         executor = Executors.newSingleThreadExecutor();
         readerTask = executor.submit(() -> {
@@ -183,18 +148,15 @@ public class HomeController {
                     if (data instanceof Map) {
                         friendsMap = (Map<String, String>) data;
                         updateFriendList(friendsMap);
-                    } else if (data instanceof String) {
-                        String message = (String) data;
+                    } else if (data instanceof String message) {
                         if (message.startsWith("Invite from")) {
                             Platform.runLater(() -> {
                                 showInviteDialog(message);
                             });
                         } else if (message.startsWith("Enter Lobby")) {
                             Thread.sleep(1000);
-//                            listening.set(false);
-                            Platform.runLater(() -> {
-                                enterLobby();
-                            });
+                            listening.set(false);
+                            Platform.runLater(this::enterLobby);
                         }
                     }
                 }

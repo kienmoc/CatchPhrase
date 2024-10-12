@@ -93,7 +93,6 @@ public class ImageviewController {
         dIn = player.ois;
         dOut = player.oos;
         playerDisplay.setText("PLAYER: " + player.getUsername());
-        dOut.writeBoolean(true); dOut.flush();   //player ready==true
         imageReceiver();
         allResponses();
     }
@@ -119,49 +118,6 @@ public class ImageviewController {
             }
         }).start();
     }
-
-//    public void allResponses(){
-//        Thread allres=new Thread(() -> {
-//            Thread timer=setTimer(0);
-//            try {
-//                while(true){
-//                    String res = (String) dIn.readObject();
-//                    if(res.startsWith("Round: ")){
-//                        timer.join();
-//                        timer = setTimer(90);
-//                        Platform.runLater(()->serverLabel.setText(res));
-//                    } else if(res.equals("ROUND OVER")) {
-////                        timer.interrupt();
-////                        Thread waitTimer = setWaitTimer(5);
-////                        waitTimer.join();
-//                        tellServer("IM_DONE_GUESSING");
-//                        String ans=(String) dIn.readObject();
-//                        Platform.runLater(()->{
-//                            serverLabel.setText(ans);
-//                            list.clear();
-//                        });
-//                        timer = setTimer(90);
-//                    } else if(res.equals("GAME OVER")) {
-////                        timer.join();
-//                        String ans=(String) dIn.readObject();
-//                        Platform.runLater(()->serverLabel.setText(ans));
-////                        timer=setTimer(10);
-////                        timer.join();
-//                        Platform.runLater(() -> serverLabel.setText(res));
-////                        timer=setTimer(10);
-////                        timer.join();
-//                        player.server.close();
-//                        System.exit(0);
-//                    } else Platform.runLater(()->list.appendText(res + "\n"));
-//                }
-//            } catch (IOException | ClassNotFoundException | InterruptedException e) { e.printStackTrace(); }
-//        });
-//        allres.start();
-//
-////        try {
-////            allres.join();
-////        } catch (InterruptedException e) { e.printStackTrace(); }
-//    }
 
     public void allResponses(){
         Thread allres=new Thread(() -> {

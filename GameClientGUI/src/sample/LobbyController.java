@@ -44,11 +44,11 @@ public class LobbyController {
                 for(int i=1;i<=2;i++){
                     int finalI = i;
                     String friend = (String) dIn.readObject();
-                    if(!friend.trim().startsWith("Word:")) {
-                        System.out.println("Friend: " + friend);
-                        Platform.runLater(() -> playerList.appendText(finalI + ". " + friend + "\n"));
-                        System.out.println(i + ": " + friend);
-                    }
+//                    if(!friend.trim().startsWith("Word:")) {
+                    System.out.println("Friend: " + friend);
+                    Platform.runLater(() -> playerList.appendText(finalI + ". " + friend + "\n"));
+                    System.out.println(i + ": " + friend);
+//                    }
                 }
                 setTimer(5);
             } catch (IOException | ClassNotFoundException e) {e.printStackTrace();}

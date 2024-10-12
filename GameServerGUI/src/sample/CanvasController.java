@@ -71,7 +71,7 @@ public class CanvasController {
     }
 
     public void setWord(String word){
-        wordLabel.setText("GUESS THIS: "+word);
+        wordLabel.setText("GUESS THIS: " + word);
     }
 
     public void onSave() {

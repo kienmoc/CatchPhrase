@@ -14,6 +14,9 @@ import java.net.Socket;
 import java.util.ArrayList;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 public class StartHandler extends Thread{
@@ -28,6 +31,8 @@ public class StartHandler extends Thread{
 
     //
     private static Map<String, ObjectOutputStream> userOutputStreams = new ConcurrentHashMap<>();
+    private ExecutorService executor;
+    private Future<?> readerTask;
     //
 
     public StartHandler(ArrayList<StartHandler> sList,int num,
@@ -53,35 +58,42 @@ public class StartHandler extends Thread{
             ServerMain.scoreList.add(0);
 
 //            if(slno==ServerMain.playerCount) outToAll();
-            if(slno==ServerMain.playerCount) {
-                sendFriendsList();
-            }
+//            if(slno==ServerMain.playerCount) {
+            sendFriendsList();
+//            }
+            executor = Executors.newSingleThreadExecutor();
+            readerTask = executor.submit(() -> {
+                while (listening.get()) {
+                    System.out.println(listening.get());
+                    Object request = null;
+                    try {
+                        request = dIn.readObject();
+                    } catch (IOException | ClassNotFoundException e) {
+                        e.printStackTrace();
+                    }
+                    if (request instanceof String message) {
+                        System.out.println(message);
+                        if (message.startsWith("Invite:")) {
+                            // Ví dụ: "Invite:usernameTarget"
+                            String targetUsername = message.substring(7).trim();
+                            sendInviteToTarget(username, targetUsername);
+                        } else if (message.startsWith("Accept:") || message.startsWith("Decline:")) {
+                            // Ví dụ: "Accept:usernameTarget" hoặc "Decline:usernameTarget"
+                            String[] parts = message.split(":");
+                            if (parts.length == 2) {
+                                String response = parts[0];
+                                String targetUsername = parts[1].trim();
+                                notifyInviteResponse(username, targetUsername, response);
 
-            while (listening.get()) {
-                System.out.println(listening.get());
-                Object request = dIn.readObject();
-                if (request instanceof String) {
-                    String message = (String) request;
-                    System.out.println(message);
-                    if (message.startsWith("Invite:")) {
-                        // Ví dụ: "Invite:usernameTarget"
-                        String targetUsername = message.substring(7).trim();
-                        sendInviteToTarget(username, targetUsername);
-                    } else if (message.startsWith("Accept:") || message.startsWith("Decline:")) {
-                        // Ví dụ: "Accept:usernameTarget" hoặc "Decline:usernameTarget"
-                        String[] parts = message.split(":");
-                        if (parts.length == 2) {
-                            String response = parts[0];
-                            String targetUsername = parts[1].trim();
-                            notifyInviteResponse(username, targetUsername, response);
+                                listening.set(false);
+                                sendEnterLobby(targetUsername, username);
 
-                            listening.set(false);
-                            sendEnterLobby(targetUsername, username);
+                            }
                         }
                     }
-                }
 //            dIn.readBoolean();
-            }
+                }
+            });
         } catch (IOException | ClassNotFoundException e) {
             System.out.println("Client " + username + " disconnected.");
             e.printStackTrace();
@@ -89,6 +101,9 @@ public class StartHandler extends Thread{
     }
 
     private void sendEnterLobby(String user1, String user2) {
+        readerTask.cancel(true);
+        executor.shutdownNow();
+
         ObjectOutputStream out1 = userOutputStreams.get(user1);
         ObjectOutputStream out2 = userOutputStreams.get(user2);
 
@@ -118,25 +133,21 @@ public class StartHandler extends Thread{
     private void loadCanvas() {
 
         try {
-            FXMLLoader loader = new FXMLLoader(getClass().getResource("canvas.fxml")); // Đảm bảo đường dẫn đúng
-            Parent root = null;
-            root = loader.load();
-            Scene scene = new Scene(root);
+            sleep(1000);
+            outToAll();
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("canvas.fxml"));
+            Scene scene = new Scene(loader.load());
 
-            // Giả sử bạn muốn mở trong một cửa sổ mới
             Stage stage = new Stage();
             stage.setScene(scene);
             stage.setTitle("Game");
             stage.show();
 
-            // Nếu cần, có thể lấy CanvasController và thực hiện các thao tác khác
             CanvasController controller = loader.getController();
 //            controller.initialize();
 
-            outToAll();
-
-        } catch (IOException e) {
-            throw new RuntimeException(e);
+        } catch (IOException | InterruptedException e) {
+            e.printStackTrace();
         }
     }
 
