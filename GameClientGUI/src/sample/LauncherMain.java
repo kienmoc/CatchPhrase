@@ -8,13 +8,11 @@ import javafx.scene.image.Image;
 import javafx.stage.Stage;
 
 public class LauncherMain extends Application {
-
     Stage stage;
-
     @Override
     public void start(Stage primaryStage) throws Exception {
         stage=primaryStage;
-        Parent root = FXMLLoader.load(getClass().getResource("intro.fxml"));
+        Parent root = FXMLLoader.load(getClass().getResource("login.fxml"));
         stage.setTitle("Pictionary game");
 
         Image applicationIcon=new Image(getClass().getResourceAsStream("paint1.png"));

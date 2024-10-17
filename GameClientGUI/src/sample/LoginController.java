@@ -6,6 +6,7 @@ import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
+import javafx.scene.control.Hyperlink;
 import javafx.scene.control.TextField;
 import javafx.stage.Stage;
 import javax.swing.*;
@@ -13,24 +14,26 @@ import java.io.IOException;
 import java.net.Socket;
 
 
-public class IntroController {
+public class LoginController {
     @FXML
-    private TextField name,ip;
+    private TextField usr, pwd;
     @FXML
-    private Button go;
+    private Button loginButton;
+    @FXML
+    private Hyperlink registerLink;
 
     UserData player;
 
     public void initialize(){}
 
-    public void nextScene() {
-        String username = name.getText();
-        String password = ip.getText();
+    public void login() {
+        String username = usr.getText();
+        String password = pwd.getText();
         if(username.isEmpty()){
             JOptionPane.showMessageDialog(null,"Name cannot be Empty..");
         } else if(username.equals("SERVER") || username.equals("Round")){
             JOptionPane.showMessageDialog(null,"name \""+username+"\" is not allowed, please change..");
-            name.clear();
+            usr.clear();
         } else {
             if(DBConnection.authenticateUser(username, password)) {
                 try {
@@ -48,21 +51,29 @@ public class IntroController {
             } else {
                 JOptionPane.showMessageDialog(null,"Username or password is incorrect !");
             }
-//                player = new UserData(username, password);
-//                Socket server = new Socket(password, 6666);
-//                player.setSocket(server);
             try {
-//                FXMLLoader loader=new FXMLLoader(getClass().getResource("lobby.fxml"));
                 FXMLLoader loader=new FXMLLoader(getClass().getResource("home.fxml"));
                 Parent root=loader.load();
+//                LobbyController controller = loader.getController();
                 HomeController controller = loader.getController();
                 controller.setUserData(player);
-                Stage stage = (Stage) go.getScene().getWindow();
+                Stage stage = (Stage) loginButton.getScene().getWindow();
                 stage.setScene(new Scene(root));
                 stage.setTitle("Đuổi hình bắt chữ");
                 stage.show();
             } catch (IOException e) {e.printStackTrace();}
         }
+    }
+
+    public void showRegisterForm(){
+        try {
+            FXMLLoader loader=new FXMLLoader(getClass().getResource("register.fxml"));
+            Parent root=loader.load();
+            Stage stage=(Stage) loginButton.getScene().getWindow();
+            stage.setScene(new Scene(root));
+            stage.setTitle("Đuổi hình bắt chữ");
+            stage.show();
+        } catch (IOException e) {e.printStackTrace();}
     }
     public void onExit(){
         Platform.exit();
