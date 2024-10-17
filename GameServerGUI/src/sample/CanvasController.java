@@ -127,7 +127,6 @@ public class CanvasController {
                 }
                 Platform.runLater(() -> displayTimer.setText(""));
             } catch (InterruptedException e) {
-//                e.printStackTrace();
                 System.out.println("Wait timer was interrupted.");
             }
         });
@@ -202,7 +201,7 @@ public class CanvasController {
                     waitTimer.join();
                 }
                 else {
-                    sendResOut("Winner:\n"+ServerMain.getWinners());
+                    sendResOut("Winner:\n" + ServerMain.getWinners());
                     sendResOut("GAME OVER");
                     sendResOut("Round: "+round+"   word: "+word);
                     System.exit(0);
@@ -218,16 +217,22 @@ public class CanvasController {
             ObjectInputStream ois = ServerMain.oisList.get(pnum);
             while (timer.isAlive()){
                 String guess = (String) ois.readObject();
-                System.out.println("Player's message is: " + guess);
                 if(guess.equals("IM_DONE_GUESSING")) break;
+                System.out.println(pname + "s message is: " + guess);
 
                 Platform.runLater(()->list.appendText(pname+": "+guess+"\n"));
                 if (word.equals(guess.toLowerCase()) && timer.isAlive()){
                     int score = ServerMain.scoreList.get(pnum);
                     ServerMain.scoreList.set(pnum, score+10);
                     sendResOut(pname + ": Got it Correct!");
-                } else sendResOut(pname + ": " + guess);
+//
+                    if(ServerMain.scoreList.get(pnum) == 20) {
+                        sendResOut("Winner:\n" + ServerMain.getWinners());
 
+                        sendResOut("GAME OVER");
+                    }
+//
+                } else sendResOut(pname + ": " + guess);
             }
             isOneCorrect.set(true);
 

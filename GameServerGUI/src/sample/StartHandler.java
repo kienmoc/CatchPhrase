@@ -7,6 +7,7 @@ import javafx.scene.Scene;
 import javafx.scene.layout.BorderPane;
 import javafx.stage.Stage;
 
+import java.beans.Statement;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
@@ -56,27 +57,21 @@ public class StartHandler extends Thread{
 
             ServerMain.names.add(username);
             ServerMain.scoreList.add(0);
-
-//            if(slno==ServerMain.playerCount) outToAll();
-//            if(slno==ServerMain.playerCount) {
             sendFriendsList();
-//            }
-            executor = Executors.newSingleThreadExecutor();
-            readerTask = executor.submit(() -> {
-                while (listening.get()) {
-                    System.out.println(listening.get());
-                    Object request = null;
-                    try {
-                        request = dIn.readObject();
-                    } catch (IOException | ClassNotFoundException e) {
-                        e.printStackTrace();
-                    }
+
+//            executor = Executors.newSingleThreadExecutor();
+//            readerTask = executor.submit(() -> {
+//            while (listening.get()) {
+                System.out.println(username + "is listening !");
+                Object request = null;
+                try {
+                    request = dIn.readObject();
                     if (request instanceof String message) {
-                        System.out.println(message);
                         if (message.startsWith("Invite:")) {
                             // Ví dụ: "Invite:usernameTarget"
                             String targetUsername = message.substring(7).trim();
                             sendInviteToTarget(username, targetUsername);
+                            start();
                         } else if (message.startsWith("Accept:") || message.startsWith("Decline:")) {
                             // Ví dụ: "Accept:usernameTarget" hoặc "Decline:usernameTarget"
                             String[] parts = message.split(":");
@@ -84,25 +79,39 @@ public class StartHandler extends Thread{
                                 String response = parts[0];
                                 String targetUsername = parts[1].trim();
                                 notifyInviteResponse(username, targetUsername, response);
-
-                                listening.set(false);
                                 sendEnterLobby(targetUsername, username);
-
                             }
                         }
                     }
-//            dIn.readBoolean();
+                } catch (IOException | ClassNotFoundException e) {
+                    e.printStackTrace();
                 }
-            });
+
+//            }
+//            });
         } catch (IOException | ClassNotFoundException e) {
             System.out.println("Client " + username + " disconnected.");
-            e.printStackTrace();
         }
     }
 
-    private void sendEnterLobby(String user1, String user2) {
-        readerTask.cancel(true);
-        executor.shutdownNow();
+    private void sendEnterLobby(String user1, String user2){
+//
+//        StartHandler invitedUser = clientsList.get(slno);
+//        invitedUser.listening.set(false);
+//        invitedUser.readerTask.cancel(true);
+//        invitedUser.executor.shutdown();
+//
+//        readerTask.cancel(true);
+//        executor.shutdownNow();
+//
+//        StartHandler s1 = clientsList.get(ServerMain.names.indexOf(user1));
+//        StartHandler s2 = clientsList.get(ServerMain.names.indexOf(user2));
+//        s1.listening.set(false);
+//        s2.listening.set(false);
+
+//        System.out.println(user1 + " " + clientsList.get(ServerMain.names.indexOf(user1)).isAlive());
+//        System.out.println(user2 + " " + clientsList.get(ServerMain.names.indexOf(user2)).isAlive());
+//
 
         ObjectOutputStream out1 = userOutputStreams.get(user1);
         ObjectOutputStream out2 = userOutputStreams.get(user2);
@@ -140,11 +149,10 @@ public class StartHandler extends Thread{
 
             Stage stage = new Stage();
             stage.setScene(scene);
-            stage.setTitle("Game");
-            stage.show();
+//            stage.setTitle("Game");
+//            stage.show();
 
-            CanvasController controller = loader.getController();
-//            controller.initialize();
+//            CanvasController controller = loader.getController();
 
         } catch (IOException | InterruptedException e) {
             e.printStackTrace();

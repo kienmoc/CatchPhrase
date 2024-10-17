@@ -83,7 +83,7 @@ public class ServerMain extends Application{
         }
 
         pool.shutdown();
-        pool.awaitTermination(10, TimeUnit.SECONDS);
+        pool.awaitTermination(5, TimeUnit.SECONDS);
         System.out.println("StartHandler Closed..");
 //        System.out.println("StartHandler Ready to accept more clients..");
     }

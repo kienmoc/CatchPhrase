@@ -46,6 +46,7 @@ public class ImageviewController {
                 } catch (IOException ioe) {
                     ioe.printStackTrace();
                 }
+                System.out.println("Im done write object !!!");
                 message.clear();
             }
         });
@@ -105,13 +106,13 @@ public class ImageviewController {
             BufferedImage bIn;
             try {
                 while (!gameOver) {
-                    imSize = new byte[4]; // Nhận kích thước của ảnh
+                    imSize = new byte[4];
                     is.read(imSize);
-                    sizeInt = ByteBuffer.wrap(imSize).getInt(); // Chuyển đổi kích thước ảnh thành số nguyên
-                    byteImage = is.readNBytes(sizeInt); // Nhận dữ liệu ảnh
-                    bIn = ImageIO.read(new ByteArrayInputStream(byteImage)); // Đọc ảnh
-                    Image im = SwingFXUtils.toFXImage(bIn, null); // Chuyển đổi sang Image cho JavaFX
-                    Platform.runLater(() -> imView.setImage(im)); // Hiển thị ảnh trên UI
+                    sizeInt = ByteBuffer.wrap(imSize).getInt();
+                    byteImage = is.readNBytes(sizeInt);
+                    bIn = ImageIO.read(new ByteArrayInputStream(byteImage));
+                    Image im = SwingFXUtils.toFXImage(bIn, null);
+                    Platform.runLater(() -> imView.setImage(im));
                 }
             } catch (IOException e) {
                 e.printStackTrace();
@@ -120,7 +121,7 @@ public class ImageviewController {
     }
 
     public void allResponses(){
-        Thread allres=new Thread(() -> {
+        Thread allres = new Thread(() -> {
             Thread timer=setTimer(0);
             try {
                 while(true){

@@ -154,19 +154,22 @@ public class HomeController {
                                 showInviteDialog(message);
                             });
                         } else if (message.startsWith("Enter Lobby")) {
-                            Thread.sleep(1000);
                             listening.set(false);
                             Platform.runLater(this::enterLobby);
+
+                            readerTask.cancel(true);
+                            executor.shutdownNow();
                         }
                     }
                 }
-            } catch (IOException | ClassNotFoundException | InterruptedException e) {
+            } catch (IOException | ClassNotFoundException e) {
                 e.printStackTrace();
             }
         });
     }
 
     private void showInviteDialog(String message) {
+        System.out.println("Message is: " + message);
         Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
         alert.setTitle("Invite Received");
         alert.setHeaderText(null);
@@ -183,6 +186,7 @@ public class HomeController {
         Optional<ButtonType> result = alert.showAndWait();
 
         String targetUser = message.split(" ")[message.split(" ").length - 1];
+
 
         if (result.isPresent() && result.get() == acceptButton) {
             // Người dùng nhấn Accept
@@ -221,9 +225,9 @@ public class HomeController {
 
     private void enterLobby() {
         listening.set(false);
-//        if(listening.get() == false) {
-//            System.out.println("Noooo, i can't listening right now");
-//        }
+        if(!listening.get()) {
+            System.out.println("Noooo, i can't listening right now");
+        }
         readerTask.cancel(true);
         executor.shutdownNow();
         try {
@@ -231,20 +235,14 @@ public class HomeController {
             FXMLLoader loader = new FXMLLoader(getClass().getResource("lobby.fxml"));
             Parent root = loader.load();
 
-            // Nếu bạn cần truyền dữ liệu đến LobbyController, làm như sau:
             LobbyController controller = loader.getController();
-            if (controller != null) {
-                controller.setUserData(this.player);
-            }
+            controller.setUserData(this.player);
 
-            // Lấy Stage hiện tại từ một node đã có (ví dụ: usernameLabel)
             BorderPane borderPane = (BorderPane) usernameLabel.getScene().getRoot(); // Lấy root là BorderPane
             Stage stage = (Stage) borderPane.getScene().getWindow();
             stage.setScene(new Scene(root));
             stage.show();
         } catch (IOException e) {
-            e.printStackTrace();
-            // Hiển thị thông báo lỗi nếu không thể chuyển scene
             Alert errorAlert = new Alert(Alert.AlertType.ERROR);
             errorAlert.setTitle("Error");
             errorAlert.setHeaderText(null);
