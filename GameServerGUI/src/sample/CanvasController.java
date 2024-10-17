@@ -201,13 +201,21 @@ public class CanvasController {
                     waitTimer.join();
                 }
                 else {
+                    String result = ServerMain.getWinners();
+                    if(result.equals("draw")) {
+                        sendResOut("Draw game \n Everyone get 0.5 point");
+                        for(i=0;i < ServerMain.names.size();i++){
+                            String username = ServerMain.names.get(i);
+                            GameDAO.IncreasePoint(username, 0.5);
+                        }
+                    }
+
                     sendResOut("Winner:\n" + ServerMain.getWinners());
                     sendResOut("GAME OVER");
-                    sendResOut("Round: "+round+"   word: "+word);
+                    sendResOut("Round: " + round + "   word: " + word);
                     System.exit(0);
                 }
             } catch (InterruptedException | IOException e) { e.printStackTrace(); }
-
         }
     }
 
@@ -227,8 +235,8 @@ public class CanvasController {
                     sendResOut(pname + ": Got it Correct!");
 //
                     if(ServerMain.scoreList.get(pnum) == 20) {
-                        sendResOut("Winner:\n" + ServerMain.getWinners());
-
+                        sendResOut("Winner:\n" + ServerMain.getWinners() + "\n" + ServerMain.getWinners() + " get 1 points");
+                        GameDAO.IncreasePoint(pname, 1.0);
                         sendResOut("GAME OVER");
                     }
 //

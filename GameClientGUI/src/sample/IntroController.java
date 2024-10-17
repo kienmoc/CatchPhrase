@@ -48,7 +48,11 @@ public class IntroController {
             } else {
                 JOptionPane.showMessageDialog(null,"Username or password is incorrect !");
             }
+//                player = new UserData(username, password);
+//                Socket server = new Socket(password, 6666);
+//                player.setSocket(server);
             try {
+//                FXMLLoader loader=new FXMLLoader(getClass().getResource("lobby.fxml"));
                 FXMLLoader loader=new FXMLLoader(getClass().getResource("home.fxml"));
                 Parent root=loader.load();
                 HomeController controller = loader.getController();

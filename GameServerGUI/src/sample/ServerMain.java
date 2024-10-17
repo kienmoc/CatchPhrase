@@ -101,18 +101,40 @@ public class ServerMain extends Application{
     }
 
 
-    static String getWinners(){
+//    static String getWinners(){
+//        int i=0,ind=0,max=0;
+//        for(int score:scoreList){
+//            if(score>max){ind=i; max=score;}
+//            i++;
+//        }
+//        if(max==0) return "No winners";
+//        String wins="";
+//        for(i=0;i<names.size();i++){
+//            if(scoreList.get(i)==max){
+//                wins+=names.get(i)+"\n";
+//            }
+//        }
+//        return wins;
+//    }
+
+    static String getWinners() {
         int i=0,ind=0,max=0;
         for(int score:scoreList){
             if(score>max){ind=i; max=score;}
             i++;
         }
+
         if(max==0) return "No winners";
-        String wins="";
+        String wins="", result = "";
+        int cnt = 0;
         for(i=0;i<names.size();i++){
             if(scoreList.get(i)==max){
-                wins+=names.get(i)+"\n";
+                wins = names.get(i);
+                cnt++;
             }
+        }
+        if(cnt == 2) {
+            return "draw";
         }
         return wins;
     }

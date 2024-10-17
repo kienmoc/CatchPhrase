@@ -150,6 +150,7 @@ public class ImageviewController {
                         timer.join();
                         player.server.close();
                         System.exit(0);
+
                     } else Platform.runLater(()->list.appendText(res+"\n"));
                 }
             } catch (IOException | ClassNotFoundException | InterruptedException e) { e.printStackTrace(); }
