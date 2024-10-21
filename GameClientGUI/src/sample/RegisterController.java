@@ -41,7 +41,7 @@ public class RegisterController {
         } else {
             if(DBConnection.registerUser(username, password)) {
                 try {
-                    int score = DBConnection.getScoreFromUser(username);
+                    double score = DBConnection.getScoreFromUser(username);
                     player = new UserData(username, password, score);
                     Socket server = new Socket("localhost", 6666);
                     player.setSocket(server);

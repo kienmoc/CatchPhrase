@@ -8,7 +8,7 @@ import java.net.Socket;
 public class UserData {
     public String username,serverIP;
     public String user, password;
-    public int score;
+    public double score;
     public Socket server,imageIn,allResIn;
     ObjectOutputStream oos;
     ObjectInputStream ois;
@@ -21,7 +21,7 @@ public class UserData {
         this.username = username;
     }
 
-    public int getScore() {
+    public double getScore() {
         return score;
     }
 
@@ -29,11 +29,11 @@ public class UserData {
         this.score = score;
     }
 
-    public UserData(String username, String password, int score) throws IOException {
+    public UserData(String username, String password, double score) throws IOException {
         this.username = username;
         this.password = password;
         this.score = score;
-        imageIn=new Socket("localhost",6677);
+        imageIn=new Socket("26.30.187.160",6677);
     }
 
 //    public UserData(String name,String ip) throws IOException {

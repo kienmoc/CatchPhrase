@@ -37,9 +37,10 @@ public class LoginController {
         } else {
             if(DBConnection.authenticateUser(username, password)) {
                 try {
-                    int score = DBConnection.getScoreFromUser(username);
+                    double score = DBConnection.getScoreFromUser(username);
                     player = new UserData(username, password, score);
-                    Socket server = new Socket("localhost", 6666);
+                    System.out.println("Hi");
+                    Socket server = new Socket("26.30.187.160", 6666);
                     player.setSocket(server);
                 } catch (IOException e) {
                     JOptionPane.showMessageDialog(null,"No server running in the entered IP address\n"+
