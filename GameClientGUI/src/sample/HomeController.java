@@ -9,6 +9,7 @@ import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.HBox;
+import javafx.scene.layout.Priority;
 import javafx.stage.Stage;
 
 import javax.swing.*;
@@ -66,6 +67,11 @@ public class HomeController {
                 });
                 content = new HBox(10, usernameLabel, inviteButton);
                 content.setAlignment(Pos.CENTER_LEFT);
+
+                // Ensure full width and text fill
+                content.setMaxWidth(Double.MAX_VALUE);
+                usernameLabel.setStyle("-fx-text-fill: white;"); // Set text color to white
+
             }
 
             @Override
@@ -74,25 +80,68 @@ public class HomeController {
                 if (empty || username == null) {
                     setText(null);
                     setGraphic(null);
+                    setStyle("-fx-background-color: transparent;");  // Set empty cell background to transparent
                 } else {
                     usernameLabel.setText(username);
+                    usernameLabel.setAlignment(Pos.CENTER_LEFT);
+                    inviteButton.setAlignment(Pos.CENTER_RIGHT);
+                    content.setStyle("-fx-background-color: #1e1e1e;");
                     setGraphic(content);
+                    setStyle("-fx-padding: 0;");
+                }
+            }
+        });
+
+        rankingListView.setCellFactory(param -> new ListCell<String>() {
+            private HBox content;
+            private Label rankLabel;
+
+            {
+                rankLabel = new Label();
+                content = new HBox(rankLabel);
+                content.setAlignment(Pos.CENTER_LEFT);
+                content.setSpacing(10);
+
+                // Ensure full width and text fill
+                content.setMaxWidth(Double.MAX_VALUE);
+                rankLabel.setStyle("-fx-text-fill: white;"); // Set text color to white
+            }
+
+            @Override
+            protected void updateItem(String entry, boolean empty) {
+                super.updateItem(entry, empty);
+                if (empty || entry == null) {
+                    setText(null);
+                    setGraphic(null);
+                    setStyle("-fx-background-color: transparent;");  // Set empty cell background to transparent
+                } else {
+                    rankLabel.setText(entry);
+
+                    // Example of changing background color for even and odd items
+                    content.setStyle("-fx-background-color: #1e1e1e;");
+
+                    // Ensure the background and text style are applied
+                    setGraphic(content);
+                    setStyle("-fx-padding: 0;");
                 }
             }
         });
     }
 
-    // Phương thức để nhận dữ liệu từ IntroController
+    // Phương thức để nhận dữ liệu từ LoginController
     public void setUserData(UserData player) {
         this.player = player;
         dIn = player.ois;
         dOut = player.oos;
+
         // Cập nhật thông tin người dùng
-        usernameLabel.setText(player.getUsername());
+        usernameLabel.setText("Player's name: " + player.getUsername());
         scoreLabel.setText("Score: " + player.getScore());
 
         // Tải bảng xếp hạng từ cơ sở dữ liệu
         loadRankings();
+
+        // Lắng nghe dữ liệu từ máy chủ
         listenForData();
     }
 
@@ -118,6 +167,7 @@ public class HomeController {
         }
     }
 
+    // Phương thức cập nhật danh sách bạn bè
     private void updateFriendList(Map<String, String> friendsMap) {
         Platform.runLater(() -> {
             friendsListView.getItems().clear();
@@ -128,6 +178,7 @@ public class HomeController {
         });
     }
 
+    // Phương thức để xử lý lời mời
     private void handleInvite(String username) {
         try {
             dOut.writeObject("Invite:" + username);
@@ -138,17 +189,22 @@ public class HomeController {
         }
     }
 
+    // Phương thức để lắng nghe dữ liệu từ máy chủ
     private void listenForData() {
+
         executor = Executors.newSingleThreadExecutor();
         readerTask = executor.submit(() -> {
             try {
                 while (listening.get()) {
                     Object data = dIn.readObject();
+                    System.out.println("QC listening is " + listening.get());
                     System.out.println("Im listening ...");
+                    System.out.println("Data is: " + data);
                     if (data instanceof Map) {
                         friendsMap = (Map<String, String>) data;
                         updateFriendList(friendsMap);
                     } else if (data instanceof String message) {
+                        System.out.println(message);
                         if (message.startsWith("Invite from")) {
                             Platform.runLater(() -> {
                                 showInviteDialog(message);
@@ -168,6 +224,7 @@ public class HomeController {
         });
     }
 
+    // Phương thức hiển thị hộp thoại mời
     private void showInviteDialog(String message) {
         System.out.println("Message is: " + message);
         Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
@@ -187,7 +244,6 @@ public class HomeController {
 
         String targetUser = message.split(" ")[message.split(" ").length - 1];
 
-
         if (result.isPresent() && result.get() == acceptButton) {
             // Người dùng nhấn Accept
             acceptInvite(targetUser);
@@ -197,6 +253,7 @@ public class HomeController {
         }
     }
 
+    // Phương thức để chấp nhận lời mời
     private void acceptInvite(String targetUser) {
         try {
             dOut.writeObject("Accept:" + targetUser);
@@ -212,6 +269,7 @@ public class HomeController {
         }
     }
 
+    // Phương thức để từ chối lời mời
     private void declineInvite() {
         try {
             // Gửi phản hồi từ chối tới máy chủ nếu cần
@@ -223,6 +281,7 @@ public class HomeController {
         }
     }
 
+    // Phương thức để chuyển đến scene lobby.fxml
     private void enterLobby() {
         listening.set(false);
         if(!listening.get()) {
@@ -251,6 +310,7 @@ public class HomeController {
         }
     }
 
+    // Phương thức để đóng kết nối
     public void closeConnection() {
         try {
             if (dIn != null) {

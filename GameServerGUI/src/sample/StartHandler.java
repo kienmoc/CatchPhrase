@@ -26,15 +26,7 @@ public class StartHandler extends Thread{
     private ArrayList<StartHandler> clientsList;
     private int slno;
     private String username;
-
-    private AtomicBoolean listening = new AtomicBoolean(true);
-
-
-    //
     private static Map<String, ObjectOutputStream> userOutputStreams = new ConcurrentHashMap<>();
-    private ExecutorService executor;
-    private Future<?> readerTask;
-    //
 
     public StartHandler(ArrayList<StartHandler> sList,int num,
                         ObjectOutputStream oos,ObjectInputStream ois) {
@@ -95,24 +87,6 @@ public class StartHandler extends Thread{
     }
 
     private void sendEnterLobby(String user1, String user2){
-//
-//        StartHandler invitedUser = clientsList.get(slno);
-//        invitedUser.listening.set(false);
-//        invitedUser.readerTask.cancel(true);
-//        invitedUser.executor.shutdown();
-//
-//        readerTask.cancel(true);
-//        executor.shutdownNow();
-//
-//        StartHandler s1 = clientsList.get(ServerMain.names.indexOf(user1));
-//        StartHandler s2 = clientsList.get(ServerMain.names.indexOf(user2));
-//        s1.listening.set(false);
-//        s2.listening.set(false);
-
-//        System.out.println(user1 + " " + clientsList.get(ServerMain.names.indexOf(user1)).isAlive());
-//        System.out.println(user2 + " " + clientsList.get(ServerMain.names.indexOf(user2)).isAlive());
-//
-
         ObjectOutputStream out1 = userOutputStreams.get(user1);
         ObjectOutputStream out2 = userOutputStreams.get(user2);
 

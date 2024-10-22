@@ -55,21 +55,7 @@ public class ServerMain extends Application{
         listener1=new ServerSocket(6677);
         System.out.println("Waiting for clients...");
         Socket client;
-//        int connectedPlayers = 0;
-//        while (connectedPlayers < playerCount) {
-//            client = listener.accept();
-//            ObjectOutputStream dOut = new ObjectOutputStream(client.getOutputStream());
-//            ObjectInputStream dIn = new ObjectInputStream(client.getInputStream());
-//            connectedPlayers++;
-//            System.out.println("MAIN: Connected: " + connectedPlayers);
-//            StartHandler sThread = new StartHandler(clients, connectedPlayers, dOut, dIn);
-//            oosList.add(dOut);
-//            oisList.add(dIn);
-//            socketList.add(client);
-//            clients.add(sThread);
-//
-//            pool.execute(sThread);
-//        }
+
         for(int i=1;i<=playerCount;i++){
             client=listener.accept();
             ObjectOutputStream dOut=new ObjectOutputStream(client.getOutputStream());

@@ -33,7 +33,7 @@ public class UserData {
         this.username = username;
         this.password = password;
         this.score = score;
-        imageIn=new Socket("26.30.187.160",6677);
+        imageIn=new Socket("localhost",6677);
     }
 
 //    public UserData(String name,String ip) throws IOException {

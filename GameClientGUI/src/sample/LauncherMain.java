@@ -13,7 +13,7 @@ public class LauncherMain extends Application {
     public void start(Stage primaryStage) throws Exception {
         stage=primaryStage;
         Parent root = FXMLLoader.load(getClass().getResource("login.fxml"));
-        stage.setTitle("Pictionary game");
+        stage.setTitle("Catch The Word");
 
         Image applicationIcon=new Image(getClass().getResourceAsStream("paint1.png"));
         stage.getIcons().add(applicationIcon);

@@ -5,18 +5,18 @@
 <?import javafx.scene.layout.*?>
 <?import javafx.scene.text.*?>
 
-<BorderPane prefHeight="700.0" prefWidth="900.0" style="-fx-background-color: #003366;" xmlns="http://javafx.com/javafx/11.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="sample.HomeController">
+<BorderPane prefHeight="600.0" prefWidth="1100.0" style="-fx-background-image: url('https://wallpapercave.com/wp/wp11122403.jpg'); -fx-background-size: 100%; -fx-background-position: center;" xmlns="http://javafx.com/javafx/11.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="sample.HomeController">
 
     <!-- Phần trên cùng chứa tiêu đề game và thông tin người dùng -->
     <top>
-        <HBox spacing="10" alignment="CENTER_LEFT">
+        <HBox spacing="10" alignment="CENTER" style="-fx-background-color: rgb(0, 0, 0, 0.4);">
             <padding>
-                <Insets top="20" right="20" bottom="20" left="20" />
+                <Insets top="20" right="20" bottom="20" left="380" />
             </padding>
             <!-- Tiêu đề game -->
-            <Label text="Catch Phrase" textFill="#ff9900e5">
+            <Label text="CATCH THE WORD" textFill="#0edeef" wrapText="true">
                 <font>
-                    <Font name="Arial Bold" size="36.0" />
+                    <Font name="Arial Bold" size="45.0" />
                 </font>
             </Label>
 
@@ -25,14 +25,14 @@
 
             <!-- Tên người dùng và điểm hiện tại -->
             <VBox alignment="CENTER_RIGHT" spacing="5">
-                <Label fx:id="usernameLabel" text="Name" textFill="WHITE">
+                <Label fx:id="usernameLabel" text="Name" textFill="WHITE" style="-fx-text-fill: white;">
                     <font>
-                        <Font name="Arial" size="18.0" />
+                        <Font name="Arial Bold" size="18.0"/>
                     </font>
                 </Label>
                 <Label fx:id="scoreLabel" text="Score: 0" textFill="WHITE">
                     <font>
-                        <Font name="Arial" size="18.0" />
+                        <Font name="Arial Bold" size="18.0" />
                     </font>
                 </Label>
             </VBox>
@@ -45,12 +45,12 @@
             <padding>
                 <Insets top="20" right="20" bottom="20" left="20" />
             </padding>
-            <Label text="Leaderboard" textFill="#ff9900e5">
+            <Label text="Leaderboard" textFill="#0edeef" alignment="BASELINE_CENTER">
                 <font>
                     <Font name="Arial Bold" size="24.0" />
                 </font>
             </Label>
-            <ListView fx:id="rankingListView" prefWidth="200" prefHeight="600" />
+            <ListView fx:id="rankingListView" prefWidth="300" prefHeight="600" style="-fx-background-color: #1e1e1e; -fx-color: #000000; -fx-padding: 10px; -fx-border-color: #0edeef; -fx-border-width: 2px; -fx-border-radius: 10px; -fx-background-radius: 10px; -fx-font-size: 16px;"/>
         </VBox>
     </left>
 
@@ -60,12 +60,12 @@
             <padding>
                 <Insets top="20" right="20" bottom="20" left="20" />
             </padding>
-            <Label text="Friend Online" textFill="#ff9900e5">
+            <Label text="Friend Online" textFill="#0edeef" alignment="CENTER">
                 <font>
                     <Font name="Arial Bold" size="24.0" />
                 </font>
             </Label>
-            <ListView fx:id="friendsListView" prefWidth="200" prefHeight="600" />
+            <ListView fx:id="friendsListView" prefWidth="300" prefHeight="600" style="-fx-background-color: #1e1e1e; -fx-color: #000000; -fx-padding: 10px; -fx-border-color: #0edeef; -fx-border-width: 2px; -fx-border-radius: 10px; -fx-background-radius: 10px; -fx-font-size: 16px;"/>
         </VBox>
     </right>
 

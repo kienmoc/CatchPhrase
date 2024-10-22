@@ -11,6 +11,8 @@ import javafx.scene.control.TextField;
 import javafx.stage.Stage;
 import javax.swing.*;
 import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 import java.net.Socket;
 
 
@@ -26,7 +28,7 @@ public class LoginController {
 
     public void initialize(){}
 
-    public void login() {
+    public void login() throws IOException {
         String username = usr.getText();
         String password = pwd.getText();
         if(username.isEmpty()){
@@ -39,8 +41,7 @@ public class LoginController {
                 try {
                     double score = DBConnection.getScoreFromUser(username);
                     player = new UserData(username, password, score);
-                    System.out.println("Hi");
-                    Socket server = new Socket("26.30.187.160", 6666);
+                    Socket server = new Socket("localhost", 6666);
                     player.setSocket(server);
                 } catch (IOException e) {
                     JOptionPane.showMessageDialog(null,"No server running in the entered IP address\n"+
