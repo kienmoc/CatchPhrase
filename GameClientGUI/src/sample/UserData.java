@@ -36,11 +36,6 @@ public class UserData {
         imageIn=new Socket("localhost",6677);
     }
 
-//    public UserData(String name,String ip) throws IOException {
-//        this.username=name;
-//        this.serverIP=ip;
-//        imageIn=new Socket(ip,6677);
-//    }
 
     public Socket getSocket() {
         return server;
@@ -50,7 +45,7 @@ public class UserData {
         this.server=s;
         ois=new ObjectInputStream(server.getInputStream());
         oos=new ObjectOutputStream(server.getOutputStream());
-        oos.writeObject(username);
-        oos.flush();
+//        oos.writeObject(username);
+//        oos.flush();
     }
 }

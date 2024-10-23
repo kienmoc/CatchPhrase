@@ -19,6 +19,8 @@ import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.ExecutorService;
@@ -45,6 +47,7 @@ public class HomeController {
     private ObjectInputStream dIn;
 
     private Map<String, String> friendsMap;
+    private List<String> rankingList;
 
     //    private volatile boolean listening = true;
     private AtomicBoolean listening = new AtomicBoolean(true);
@@ -129,7 +132,7 @@ public class HomeController {
     }
 
     // Phương thức để nhận dữ liệu từ LoginController
-    public void setUserData(UserData player) {
+    public void setUserData(UserData player) throws IOException, ClassNotFoundException {
         this.player = player;
         dIn = player.ois;
         dOut = player.oos;
@@ -139,10 +142,25 @@ public class HomeController {
         scoreLabel.setText("Score: " + player.getScore());
 
         // Tải bảng xếp hạng từ cơ sở dữ liệu
-        loadRankings();
+//        loadRankings();
+//        listenForRanking();
 
         // Lắng nghe dữ liệu từ máy chủ
         listenForData();
+    }
+
+    private void listenForRanking() throws IOException, ClassNotFoundException {
+
+        Object data = dIn.readObject();
+        System.out.println("Data is: " + data);
+        if (data instanceof List<?>) {
+            this.rankingList = (List<String>) data;
+//            updateFriendList(friendsMap);
+        }
+
+        for(String entry: rankingList) {
+            Platform.runLater(() -> rankingListView.getItems().add(entry));
+        }
     }
 
     // Phương thức tải bảng xếp hạng từ cơ sở dữ liệu
@@ -197,12 +215,15 @@ public class HomeController {
             try {
                 while (listening.get()) {
                     Object data = dIn.readObject();
-                    System.out.println("QC listening is " + listening.get());
-                    System.out.println("Im listening ...");
                     System.out.println("Data is: " + data);
                     if (data instanceof Map) {
                         friendsMap = (Map<String, String>) data;
                         updateFriendList(friendsMap);
+                    } else if(data instanceof List<?>) {
+                        rankingList = (List<String>) data;
+                        for(String entry: rankingList) {
+                            Platform.runLater(() -> rankingListView.getItems().add(entry));
+                        }
                     } else if (data instanceof String message) {
                         System.out.println(message);
                         if (message.startsWith("Invite from")) {

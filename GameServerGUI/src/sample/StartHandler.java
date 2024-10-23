@@ -7,12 +7,17 @@ import javafx.scene.Scene;
 import javafx.scene.layout.BorderPane;
 import javafx.stage.Stage;
 
-import java.beans.Statement;
+import javax.swing.*;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.net.Socket;
+import java.sql.Connection;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Statement;
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutorService;
@@ -29,11 +34,12 @@ public class StartHandler extends Thread{
     private static Map<String, ObjectOutputStream> userOutputStreams = new ConcurrentHashMap<>();
 
     public StartHandler(ArrayList<StartHandler> sList,int num,
-                        ObjectOutputStream oos,ObjectInputStream ois) {
+                        ObjectOutputStream oos,ObjectInputStream ois, String username) {
         clientsList=sList;
         slno=num;
         dOut=oos;
         dIn=ois;
+        this.username = username;
     }
     @Override
     public void run() {
@@ -42,47 +48,74 @@ public class StartHandler extends Thread{
             Socket s1=ServerMain.listener1.accept();
             ServerMain.socketList.add(s1);
             ServerMain.canvasOut.add(s1.getOutputStream());
-            username= (String) dIn.readObject();
-            System.out.println("StartHandler: " + username + " has joined");
+//            username= (String) dIn.readObject();
+            System.out.println("StartHandler: " + this.username + " has joined");
 
-            userOutputStreams.put(username, dOut);
+            userOutputStreams.put(this.username, dOut);
 
-            ServerMain.names.add(username);
+            ServerMain.names.add(this.username);
             ServerMain.scoreList.add(0);
             sendFriendsList();
+            sendRanking();
 
 //            executor = Executors.newSingleThreadExecutor();
 //            readerTask = executor.submit(() -> {
 //            while (listening.get()) {
-                System.out.println(username + "is listening !");
-                Object request = null;
-                try {
-                    request = dIn.readObject();
-                    if (request instanceof String message) {
-                        if (message.startsWith("Invite:")) {
-                            // Ví dụ: "Invite:usernameTarget"
-                            String targetUsername = message.substring(7).trim();
-                            sendInviteToTarget(username, targetUsername);
-                            start();
-                        } else if (message.startsWith("Accept:") || message.startsWith("Decline:")) {
-                            // Ví dụ: "Accept:usernameTarget" hoặc "Decline:usernameTarget"
-                            String[] parts = message.split(":");
-                            if (parts.length == 2) {
-                                String response = parts[0];
-                                String targetUsername = parts[1].trim();
-                                notifyInviteResponse(username, targetUsername, response);
-                                sendEnterLobby(targetUsername, username);
-                            }
+            System.out.println(username + "is listening !");
+            Object request = null;
+            try {
+                request = dIn.readObject();
+                if (request instanceof String message) {
+                    if (message.startsWith("Invite:")) {
+                        // Ví dụ: "Invite:usernameTarget"
+                        String targetUsername = message.substring(7).trim();
+                        sendInviteToTarget(username, targetUsername);
+                        start();
+                    } else if (message.startsWith("Accept:") || message.startsWith("Decline:")) {
+                        // Ví dụ: "Accept:usernameTarget" hoặc "Decline:usernameTarget"
+                        String[] parts = message.split(":");
+                        if (parts.length == 2) {
+                            String response = parts[0];
+                            String targetUsername = parts[1].trim();
+                            notifyInviteResponse(username, targetUsername, response);
+                            sendEnterLobby(targetUsername, username);
                         }
                     }
-                } catch (IOException | ClassNotFoundException e) {
-                    e.printStackTrace();
                 }
+            } catch (IOException | ClassNotFoundException e) {
+                e.printStackTrace();
+            }
 
 //            }
 //            });
-        } catch (IOException | ClassNotFoundException e) {
+        } catch (IOException e) {
+            e.printStackTrace();
             System.out.println("Client " + username + " disconnected.");
+        }
+    }
+
+    private void sendRanking() {
+        try (Connection conn = DBConnection.getConnection()) {
+            String query = "SELECT username, point FROM user ORDER BY point DESC LIMIT 10";
+            Statement stmt = conn.createStatement();
+            ResultSet rs = stmt.executeQuery(query);
+            List<String> entrys = new ArrayList<>();
+            while (rs.next()) {
+                String user = rs.getString("username");
+                int score = rs.getInt("point");
+                String entry = String.format("%s - %d point", user, score);
+                entrys.add(entry);
+            }
+
+            for(String s: entrys) System.out.println(s);
+            for (StartHandler acl : clientsList) {
+                acl.dOut.writeObject(entrys);
+                dOut.flush();
+            }
+
+        } catch (SQLException | IOException e) {
+            e.printStackTrace();
+            JOptionPane.showMessageDialog(null, "Lỗi khi tải bảng xếp hạng từ cơ sở dữ liệu.", "Lỗi", JOptionPane.ERROR_MESSAGE);
         }
     }
 
