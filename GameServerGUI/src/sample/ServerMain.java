@@ -51,57 +51,74 @@ public class ServerMain extends Application{
             ObjectOutputStream dOut=new ObjectOutputStream(client.getOutputStream());
             ObjectInputStream dIn=new ObjectInputStream(client.getInputStream());
 
-            String login = (String) dIn.readObject();
-            System.out.println(login);
-            String username = login.split(":")[1].split("/")[0];
-            String password = login.split(":")[1].split("/")[1];
+            String userAct = (String) dIn.readObject();
+            String action = userAct.split(":")[0];
+            String username = userAct.split(":")[1].split("/")[0];
+            String password = userAct.split(":")[1].split("/")[1];
 
-            if(DBConnection.authenticateUser(username, password)) {
+            if(action.equals("Register")) {
+                if(DBConnection.registerUser(username, password)) {
+                    double score = DBConnection.getScoreFromUser(username);
+                    dOut.writeDouble(score);
+                    dOut.flush();
+                    System.out.println("Im writing");
+                    System.out.println("MAIN: Connected: "+ idx);
 
-                double score = DBConnection.getScoreFromUser(username);
-                dOut.writeDouble(score);
-                dOut.flush();
-                System.out.println("Im writing");
-                System.out.println("MAIN: Connected: "+ idx);
+                    client.close();
+                    dIn.close();
+                    dOut.close();
 
-                client.close();
-                dIn.close();
-                dOut.close();
-
-                client = listener.accept();
-                dOut=new ObjectOutputStream(client.getOutputStream());
-                dIn=new ObjectInputStream(client.getInputStream());
-
-                StartHandler sThread=new StartHandler(clients, idx, dOut, dIn, username);
-                oosList.add(dOut);
-                oisList.add(dIn);
-                clients.add(sThread);
-                pool.execute(sThread);
-                idx++;
+                    client = listener.accept();
+                    dOut=new ObjectOutputStream(client.getOutputStream());
+                    dIn=new ObjectInputStream(client.getInputStream());
+                    StartHandler sThread=new StartHandler(clients, idx, dOut, dIn, username);
+                    oosList.add(dOut);
+                    oisList.add(dIn);
+                    clients.add(sThread);
+                    pool.execute(sThread);
+                    idx++;
+                } else {
+                    dOut.writeDouble(-1.0);
+                    dOut.close();
+                    dIn.close();
+                    client.close();
+                }
             } else {
-                dOut.writeDouble(-1.0);
-                dOut.close();
-                dIn.close();
-                client.close();
+                if(DBConnection.authenticateUser(username, password)) {
+
+                    double score = DBConnection.getScoreFromUser(username);
+                    dOut.writeDouble(score);
+                    dOut.flush();
+                    System.out.println("Im writing");
+                    System.out.println("MAIN: Connected: "+ idx);
+
+                    client.close();
+                    dIn.close();
+                    dOut.close();
+
+                    client = listener.accept();
+                    dOut=new ObjectOutputStream(client.getOutputStream());
+                    dIn=new ObjectInputStream(client.getInputStream());
+
+                    StartHandler sThread=new StartHandler(clients, idx, dOut, dIn, username);
+                    oosList.add(dOut);
+                    oisList.add(dIn);
+                    clients.add(sThread);
+                    pool.execute(sThread);
+                    idx++;
+                } else {
+                    dOut.writeDouble(-1.0);
+                    dOut.close();
+                    dIn.close();
+                    client.close();
+                }
             }
+
         }
-//
-//        for(int i=1;i<=playerCount;i++){
-//            client=listener.accept();
-//            ObjectOutputStream dOut=new ObjectOutputStream(client.getOutputStream());
-//            ObjectInputStream dIn=new ObjectInputStream(client.getInputStream());
-//            System.out.println("MAIN: Connected: "+ i);
-//            StartHandler sThread=new StartHandler(clients, i, dOut, dIn);
-//            oosList.add(dOut);
-//            oisList.add(dIn);
-//            clients.add(sThread);
-//            pool.execute(sThread);
-//        }
 
         pool.shutdown();
         pool.awaitTermination(5, TimeUnit.SECONDS);
         System.out.println("StartHandler Closed..");
-//        System.out.println("StartHandler Ready to accept more clients..");
     }
 
     public static Map<String, String> getFriendsMap(String excludeUsername) {
@@ -115,23 +132,6 @@ public class ServerMain extends Application{
         }
         return friendsMap;
     }
-
-
-//    static String getWinners(){
-//        int i=0,ind=0,max=0;
-//        for(int score:scoreList){
-//            if(score>max){ind=i; max=score;}
-//            i++;
-//        }
-//        if(max==0) return "No winners";
-//        String wins="";
-//        for(i=0;i<names.size();i++){
-//            if(scoreList.get(i)==max){
-//                wins+=names.get(i)+"\n";
-//            }
-//        }
-//        return wins;
-//    }
 
     static String getWinners() {
         int i=0,ind=0,max=0;

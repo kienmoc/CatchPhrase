@@ -11,6 +11,8 @@ import javafx.scene.control.TextField;
 import javafx.stage.Stage;
 import javax.swing.*;
 import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 import java.net.Socket;
 
 public class RegisterController {
@@ -23,7 +25,7 @@ public class RegisterController {
     UserData player;
     public void initialize(){}
 
-    public void register() {
+    public void register() throws IOException {
         String username = usr.getText();
         String password = pwd.getText();
         String confirmedPassword = confirmed_pwd.getText();
@@ -32,37 +34,47 @@ public class RegisterController {
         } else if(username.equals("SERVER") || username.equals("Round")) {
             JOptionPane.showMessageDialog(null, "name \"" + username + "\" is not allowed, please change..");
             usr.clear();
-        } else if(DBConnection.checkUserExists(username)){
-            JOptionPane.showMessageDialog(null,"Username already exists !");
+//        } else if(DBConnection.checkUserExists(username)){
+//            JOptionPane.showMessageDialog(null,"Username already exists !");
         } else if(password.isEmpty()){
             JOptionPane.showMessageDialog(null,"Password cannot be Empty.." );
         } else if(!password.equals(confirmedPassword)){
             JOptionPane.showMessageDialog(null,"Passwords do not match !");
         } else {
-            if(DBConnection.registerUser(username, password)) {
-                try {
-                    double score = DBConnection.getScoreFromUser(username);
-                    player = new UserData(username, password, score);
-                    Socket server = new Socket("localhost", 6666);
-                    player.setSocket(server);
-                } catch (IOException e) {
-                    JOptionPane.showMessageDialog(null,"No server running in the entered IP address\n"+
-                            "  please recheck it and try again..","CONNECTION ERROR", JOptionPane.WARNING_MESSAGE);
-                    System.out.println("Server not found..");
-                    System.exit(0);
-                }
+            Socket server = new Socket("localhost", 6666);
+            ObjectOutputStream oos = new ObjectOutputStream(server.getOutputStream());
+            ObjectInputStream ois = new ObjectInputStream(server.getInputStream());
+
+            String register = "Register:" + username + "/" + password;
+            oos.writeObject(register);
+            oos.flush();
+
+            double score = ois.readDouble();
+            System.out.println(score);
+
+            oos.close();
+            ois.close();
+            server.close();
+
+            if(score != -1.0) {
+                Socket ser = new Socket("localhost", 6666);
+                player = new UserData(username, password, score);
+                player.setSocket(ser);
             } else {
-                JOptionPane.showMessageDialog(null,"Username already exists !");
+                JOptionPane.showMessageDialog(null,"Username or password is incorrect !");
             }
             try {
-                FXMLLoader loader=new FXMLLoader(getClass().getResource("lobby.fxml"));
+                FXMLLoader loader=new FXMLLoader(getClass().getResource("home.fxml"));
                 Parent root=loader.load();
-                LobbyController controller = loader.getController();
+//                LobbyController controller = loader.getController();
+                HomeController controller = loader.getController();
                 controller.setUserData(player);
                 Stage stage = (Stage) registerButton.getScene().getWindow();
                 stage.setScene(new Scene(root));
-            } catch (IOException e) {
-                e.printStackTrace();
+                stage.setTitle("Đuổi hình bắt chữ");
+                stage.show();
+            } catch (IOException e) {e.printStackTrace();} catch (ClassNotFoundException e) {
+                throw new RuntimeException(e);
             }
         }
     }
