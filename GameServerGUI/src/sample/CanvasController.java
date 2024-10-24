@@ -159,7 +159,8 @@ public class CanvasController {
         for (int i = 0; i < 3; i++) {
             File imageFile = getRandomImageFile();
             images[i] = new Image(imageFile.toURI().toString());
-            words[i] = imageFile.getName().replace(",", " ").replace(".png", "");
+
+            words[i] = imageFile.getName().replace(",", " ").replace(".png", "").replace(".jpg", "");
         }
 
         for(int round = 1; round <= ServerMain.rounds; round++) {

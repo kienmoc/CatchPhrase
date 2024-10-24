@@ -45,7 +45,5 @@ public class UserData {
         this.server=s;
         ois=new ObjectInputStream(server.getInputStream());
         oos=new ObjectOutputStream(server.getOutputStream());
-//        oos.writeObject(username);
-//        oos.flush();
     }
 }

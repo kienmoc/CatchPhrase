@@ -141,48 +141,8 @@ public class HomeController {
         usernameLabel.setText("Player's name: " + player.getUsername());
         scoreLabel.setText("Score: " + player.getScore());
 
-        // Tải bảng xếp hạng từ cơ sở dữ liệu
-//        loadRankings();
-//        listenForRanking();
-
         // Lắng nghe dữ liệu từ máy chủ
         listenForData();
-    }
-
-    private void listenForRanking() throws IOException, ClassNotFoundException {
-
-        Object data = dIn.readObject();
-        System.out.println("Data is: " + data);
-        if (data instanceof List<?>) {
-            this.rankingList = (List<String>) data;
-//            updateFriendList(friendsMap);
-        }
-
-        for(String entry: rankingList) {
-            Platform.runLater(() -> rankingListView.getItems().add(entry));
-        }
-    }
-
-    // Phương thức tải bảng xếp hạng từ cơ sở dữ liệu
-    private void loadRankings() {
-        try (Connection conn = DBConnection.getConnection()) {
-            String query = "SELECT username, point FROM user ORDER BY point DESC LIMIT 10";
-            Statement stmt = conn.createStatement();
-            ResultSet rs = stmt.executeQuery(query);
-
-            // Xóa danh sách hiện tại trước khi thêm mới
-            Platform.runLater(() -> rankingListView.getItems().clear());
-
-            while (rs.next()) {
-                String user = rs.getString("username");
-                int score = rs.getInt("point");
-                String entry = String.format("%s - %d point", user, score);
-                Platform.runLater(() -> rankingListView.getItems().add(entry));
-            }
-        } catch (SQLException e) {
-            e.printStackTrace();
-            JOptionPane.showMessageDialog(null, "Lỗi khi tải bảng xếp hạng từ cơ sở dữ liệu.", "Lỗi", JOptionPane.ERROR_MESSAGE);
-        }
     }
 
     // Phương thức cập nhật danh sách bạn bè
@@ -221,6 +181,8 @@ public class HomeController {
                         updateFriendList(friendsMap);
                     } else if(data instanceof List<?>) {
                         rankingList = (List<String>) data;
+                        // Refresh the list view
+                        Platform.runLater(() -> rankingListView.getItems().clear());
                         for(String entry: rankingList) {
                             Platform.runLater(() -> rankingListView.getItems().add(entry));
                         }

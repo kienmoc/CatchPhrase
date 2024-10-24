@@ -5,35 +5,44 @@
 <?import javafx.scene.layout.*?>
 <?import javafx.scene.text.*?>
 
-<BorderPane prefHeight="700.0" prefWidth="900.0" style="-fx-background-color: #003366;" xmlns="http://javafx.com/javafx/11.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="sample.LobbyController">
+<BorderPane prefHeight="700.0" prefWidth="900.0" style="-fx-background-image: url('https://wallpapercave.com/wp/wp11122403.jpg'); -fx-background-size: cover; -fx-background-position: center;" xmlns="http://javafx.com/javafx/11.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="sample.LobbyController">
+
    <top>
-      <Label prefHeight="95.0" prefWidth="156.0" text="Lobby" textFill="#ff9900e5" BorderPane.alignment="CENTER">
-         <font>
-            <Font name="Tlwg Mono Bold" size="50.0" />
-         </font>
-      </Label>
-   </top>
-   <center>
-      <TextArea fx:id="playerList" editable="false" prefHeight="394.0" prefWidth="400.0" promptText="players" wrapText="true" BorderPane.alignment="CENTER">
-         <font>
-            <Font name="Tlwg Mono Bold" size="24.0" />
-         </font>
-         <BorderPane.margin>
-            <Insets bottom="50.0" left="200.0" right="200.0" />
-         </BorderPane.margin>
-      </TextArea>
-   </center>
-   <bottom>
-      <Label fx:id="displayTimer" alignment="CENTER" contentDisplay="CENTER" prefHeight="111.0" prefWidth="403.0" text="Game starts once all players join.." textAlignment="CENTER" textFill="WHITE" wrapText="true" BorderPane.alignment="CENTER">
-         <font>
-            <Font name="Tlwg Mono Bold" size="36.0" />
-         </font>
-         <BorderPane.margin>
-            <Insets bottom="50.0" />
-         </BorderPane.margin>
+      <HBox spacing="10" alignment="CENTER" style="-fx-background-color: rgba(0, 0, 0, 0.6);">
          <padding>
-            <Insets left="10.0" />
+            <Insets top="10" right="20" bottom="10" left="20" />
          </padding>
-      </Label>
+         <Label text="LOBBY" wrapText="true" style="-fx-text-fill: #0edeef;">
+            <font>
+               <Font name="Tlwg Mono Bold" size="50.0" />
+            </font>
+         </Label>
+      </HBox>
+   </top>
+
+   <center>
+      <VBox alignment="CENTER" spacing="10">
+         <padding>
+            <Insets top="20" right="120" bottom="20" left="120" />
+         </padding>
+         <TextArea fx:id="playerList" editable="false" prefHeight="400.0" prefWidth="300.0" promptText="Players" wrapText="true" style="-fx-background-color: rgba(255, 255, 255, 0.8); -fx-border-color: #0edeef; -fx-border-width: 2px; -fx-border-radius: 10px; -fx-background-radius: 10px;">
+            <font>
+               <Font name="Tlwg Mono Bold" size="24.0" />
+            </font>
+         </TextArea>
+      </VBox>
+   </center>
+
+   <bottom>
+      <HBox alignment="CENTER" style="-fx-background-color: rgba(0, 0, 0, 0.6);">
+         <padding>
+            <Insets top="10" right="20" bottom="10" left="20" />
+         </padding>
+         <Label fx:id="displayTimer" alignment="CENTER" prefHeight="100.0" prefWidth="500.0" text="Game starts once all players join..." textFill="WHITE" wrapText="true">
+            <font>
+               <Font name="Tlwg Mono Bold" size="36.0" />
+            </font>
+         </Label>
+      </HBox>
    </bottom>
 </BorderPane>

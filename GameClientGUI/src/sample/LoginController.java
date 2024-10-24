@@ -53,6 +53,7 @@ public class LoginController {
             server.close();
 
             if(score != -1.0) {
+//                Socket ser = new Socket("192.168.0.177", 6666);
                 Socket ser = new Socket("localhost", 6666);
                 player = new UserData(username, password, score);
                 player.setSocket(ser);
